@@ -9,6 +9,8 @@ import adminRouter from './admins';
 import userRouter from './users';
 import bansRouter from './bans';
 import playerInfoRouter from './playerInfo';
+import unbansRouter from './unbans';
+import serversRoutes from './servers';
 
 export const prisma = new PrismaClient();
 
@@ -18,7 +20,7 @@ const port = 5000;
 app.use(bodyParser.json());
 app.use(cors());
 app.get('/', async (req, res) => {
-    res.send('Available routers: [\'/api/admins\', \'/api/users\', \'/api/bans\', \'/api/playerInfo/:id\']');
+    res.send('Available routers: [\'/api/admins\', \'/api/users\', \'/api/bans\', \'/api/playerInfo/:id\', \'/api/servers/:id\', \'/api/unbans/:id\']');
 });
 
 const options = {
@@ -38,6 +40,10 @@ app.get('/api/bans', bansRouter);
 app.post('/api/bans', bansRouter);
 
 app.get('/api/playerInfo/:id', playerInfoRouter);
+
+app.get('/api/unbans/:id', unbansRouter);
+
+app.get('/api/servers/:id', serversRoutes);
 
 async function main() {
     server.listen(port, () => console.log(`Listening on port ${port}`));

@@ -14,7 +14,7 @@ export function hashSalt(salt: string): string {
     return Buffer.from(salt, 'base64').toString();
 }
 
-export function unhashSalt(hashedSalt: string): string {
+export function unhashSalt(hashedSalt: Array<number>): string {
     return Buffer.from(hashedSalt).toString('base64');
 }
 

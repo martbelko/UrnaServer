@@ -4,6 +4,7 @@ import express from 'express';
 import { generateSalt, hashPassword, hashSalt } from './database';
 import { validateUserEmail, validateUserName } from './validators/userValidator';
 import { validatePassword } from './validators/passwordValidator';
+import { TextEncoder } from 'util';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
@@ -56,7 +57,7 @@ router.post('/api/users', async (req, res) => {
     }
 
     const salt = generateSalt();
-    const hashedPassword = hashPassword(user.password, salt);
+    const hashedPassword = new TextEncoder().encode(hashPassword(user.password, salt));
     const hashedSalt = hashSalt(salt);
 
     try {
@@ -66,7 +67,7 @@ router.post('/api/users', async (req, res) => {
                 email: user.email,
                 password: {
                     create: {
-                        password: hashedPassword,
+                        password: Array.from(hashedPassword),
                         salt: hashedSalt
                     }
                 }
