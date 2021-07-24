@@ -16,8 +16,7 @@ const port = 5000;
 app.use(bodyParser.json());
 app.use(cors());
 app.get('/', async (req, res) => {
-    console.log(req.body);
-    res.send('Almost');
+    res.send('Available routers: [\'/api/admins\', \'/api/users\', \'/api/bans\', \'/api/playerInfo/:id\']');
 });
 
 app.get('/api/admins', adminRouter);
