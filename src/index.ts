@@ -22,7 +22,7 @@ app.get('/', async (req, res) => {
 });
 
 const options = {
-    key: fs.readFileSync('key.key'),
+    key: fs.readFileSync('key.pem'),
     cert: fs.readFileSync('server.crt')
 };
 
