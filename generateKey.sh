@@ -1,0 +1,1 @@
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out server.crt -days 365 -nodes -config req.cnf
