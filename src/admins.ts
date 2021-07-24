@@ -6,7 +6,7 @@ import { validatePassword } from './validators/passwordValidator';
 import { validateFlags, validateSteamID } from './validators/adminValidator';
 import { generateSalt, hashPassword, hashSalt } from './database';
 import { TextEncoder } from 'util';
-import { PrismaClientInitializationError, PrismaClientKnownRequestError, PrismaClientRustPanicError, PrismaClientValidationError } from '@prisma/client/runtime';
+import { PrismaClientValidationError } from '@prisma/client/runtime';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
