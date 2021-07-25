@@ -1,41 +1,48 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
 
-import { validateUserEmail, validateUserName } from './validators/userValidator';
-import { validatePassword } from './validators/passwordValidator';
-import { validateFlags, validateSteamID } from './validators/adminValidator';
-import { generateSalt, hashPassword, hashSalt } from './database';
-import { TextEncoder } from 'util';
+import { validateFlags, validateImmunity, validateSteamID } from './validators/adminValidator';
 import { PrismaClientValidationError } from '@prisma/client/runtime';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
 
-router.get('/api/admins', async (req, res) => {
+interface AdminGet {
+    id: number | undefined;
+    steamid: string | undefined;
+    flags: number | undefined;
+    email: string | undefined;
+    name: string | undefined;
+}
+
+router.get('/api/admins', (req, res, next) => {
     const id = Number(req.query.id as string);
     const name = req.query.name as string;
     const steamid = req.query.steamid as string;
     const email = req.query.email as string;
-    const flags = Number(req.query.flags);
+    const flags = Number(req.query.flags as string);
 
-    if (req.query.id != undefined && isNaN(id)) {
-        res.send({ error: `'id' must be a number, but was ${req.query.id}` });
-        return;
-    }
+    const admin: AdminGet = {
+        id: isNaN(id) ? undefined : id,
+        name: name,
+        steamid: steamid,
+        email: email,
+        flags: isNaN(flags) ? undefined : flags
+    };
 
-    if (req.query.flags != undefined && isNaN(flags)) {
-        res.send({ error: `'flags' must be a number, but was ${req.query.flags}` });
-        return;
-    }
-
+    req.params = admin;
+    next();
+},
+async (req, res) => {
+    const admin = req.params as AdminGet;
     const admins = await prisma.admin.findMany({
         where: {
-            id: Number.isNaN(id) ? undefined : id,
-            steamID: steamid,
-            flags: Number.isNaN(flags) ? undefined : flags,
+            id: admin.id,
+            steamID: admin.steamid,
+            flags: admin.flags,
             user: {
-                name,
-                email
+                name: admin.name,
+                email: admin.email
             }
         }
     });
@@ -43,108 +50,173 @@ router.get('/api/admins', async (req, res) => {
     res.send(JSON.stringify(admins));
 });
 
-router.post('/api/admins', async (req, res) => {
+interface AdminPost {
+    steamid: string;
+    flags: number;
+    immunity: number;
+    userid: number;
+}
+
+router.post('/api/admins', (req, res, next) => {
     if (req.body instanceof Array) {
-        res.send({ error: 'Maximum 1 admin insertion' });
-        return;
+        return res.send({ error: 'Maximum 1 admin insertion' });
     }
 
-    const admin = req.body;
+    const steamid = req.body.steamid as string;
+    const flagsStr = req.body.flags as string;
+    const immunityStr = req.body.immunity as string;
+    const useridStr = req.body.userid as string;
+
+    if (flagsStr == undefined) {
+        return res.send({ error: '\'flags\' property missing' });
+    }
+
+    if (immunityStr == undefined) {
+        return res.send({ error: '\'immunity\' property missing' });
+    }
+
+    if (useridStr == undefined) {
+        return res.send({ error: '\'userid\' property missing' });
+    }
+
+    const flags = Number(flagsStr);
+    const immunity = Number(immunityStr);
+    const userid = Number(useridStr);
 
     {
-        const steamidError = validateSteamID(admin.steamid);
-        if (steamidError != null) {
-            res.send({ error: steamidError });
-            return;
+        const error = validateSteamID(steamid);
+        if (error != null) {
+            return res.send({ error: error });
         }
     }
 
     {
-        const flagsError = validateFlags(admin.flags);
-        if (flagsError != null) {
-            res.send({ error: flagsError });
-            return;
+        const error = validateFlags(flags);
+        if (error != null) {
+            return res.send({ error: error });
         }
     }
 
-    if (admin.username == undefined) {
-        {
-            const nameError = validateUserName(admin.name);
-            if (nameError != null) {
-                res.send({ error: nameError });
-                return;
-            }
+    {
+        const error = validateImmunity(immunity);
+        if (error != null) {
+            return res.send({ error: error });
         }
+    }
 
-        {
-            const emailError = validateUserEmail(admin.email);
-            if (emailError != null) {
-                res.send({ error: emailError });
-                return;
-            }
-        }
+    const admin: AdminPost = {
+        steamid: steamid,
+        flags: flags,
+        immunity: immunity,
+        userid: userid
+    };
 
-        {
-            const passwordError = validatePassword(admin.password);
-            if (passwordError != null) {
-                res.send({ error: passwordError });
-                return;
-            }
-        }
-
-        const salt = generateSalt();
-        const hashedPassword = new TextEncoder().encode(hashPassword(admin.password, salt));
-        const hashedSalt = hashSalt(salt);
-
-        try {
-            const insertedAdmin = await prisma.admin.create({
-                data: {
-                    steamID: admin.steamid,
-                    flags: admin.flags,
-                    user: {
-                        create: {
-                            name: admin.name,
-                            email: admin.email,
-                            password: {
-                                create: {
-                                    password: Array.from(hashedPassword),
-                                    salt: hashedSalt,
-                                },
-                            },
-                        },
-                    },
-                },
-            });
-
-            res.send({ admin: insertedAdmin });
-        } catch (e) {
-            res.send({ error: e });
-        }
-    } else {
-        try {
-            const insertedAdmin = await prisma.admin.create({
-                data: {
-                    steamID: admin.steamid,
-                    flags: admin.flags,
-                    user: {
-                        connect: {
-                            name: admin.username
-                        }
+    req.params = admin;
+    next();
+},
+async (req, res) => {
+    const admin = req.params as AdminPost;
+    try {
+        const insertedAdmin = await prisma.admin.create({
+            data: {
+                steamID: admin.steamid,
+                flags: admin.flags,
+                immunity: admin.immunity,
+                user: {
+                    connect: {
+                        id: admin.userid
                     }
                 }
-            });
-
-            res.send({ admin: insertedAdmin });
-        } catch (e) {
-            if (e instanceof PrismaClientValidationError) {
-                const index = e.message.search('\n\nArgument flags:') + 2;
-                const message = e.message.substring(index, e.message.length - 2);
-                res.send({ error: message });
-                return;
             }
+        });
 
-            res.send({ error: e });
+        res.send({ admin: insertedAdmin });
+    } catch (e) {
+        if (e instanceof PrismaClientValidationError) {
+            const index = e.message.search('\n\nArgument flags:') + 2;
+            const message = e.message.substring(index, e.message.length - 2);
+            return res.send({ error: message });
         }
+
+        return res.send({ error: e });
+    }
+});
+
+router.patch('/api/admins/:id', async (req, res) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        return res.send({ error: `'id' property must be a number, but was '${req.params.id}'` });
+    }
+
+    const steamid = req.body.steamid as string;
+    if (steamid != undefined) {
+        const error = validateSteamID(steamid);
+        if (error != null) {
+            return res.send({ error: error });
+        }
+    }
+
+    const flags = req.body.flags == undefined ? undefined : Number(req.body.flags as string);
+    if (flags != undefined) {
+        const error = validateFlags(flags);
+        if (error != null) {
+            return res.send({ error: error });
+        }
+    }
+
+    {
+        const admin = await prisma.admin.findFirst({
+            where: {
+                id: id
+            }
+        });
+
+        if (admin?.steamID == 'CONSOLE') {
+            return res.send({ error: 'Cannot update admin \'CONSOLE\'' });
+        }
+    }
+
+    const admin = await prisma.admin.update({
+        where: {
+            id: id
+        },
+        data: {
+            steamID: steamid,
+            flags: flags
+        }
+    });
+
+    return res.send({ admin: admin });
+});
+
+router.delete('/api/admins/:id', async (req, res) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        return res.send({ error: `'id' must be a number, but was '${req.params.id}'` });
+    }
+
+    {
+        const admin = await prisma.admin.findFirst({
+            where: {
+                id: id
+            }
+        });
+
+        if (admin?.steamID == 'CONSOLE') {
+            return res.send({ error: 'Cannot delete admin \'CONSOLE\'' });
+        }
+    }
+
+    try {
+        const admin = await prisma.admin.delete({
+            where: {
+                id: id
+            }
+        });
+
+        return res.send({ admin: admin });
+    } catch (e) {
+        return res.send({ error: e });
     }
 });
 

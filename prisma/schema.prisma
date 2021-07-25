@@ -21,7 +21,7 @@ model User {
 
   password Password @relation(fields: [passwordID], references: [id])
 
-  admins Admin[]
+  admin Admin?
 }
 
 model Password {
@@ -29,7 +29,7 @@ model Password {
   password Int[]
   salt     String
 
-  users User[]
+  users User?
 }
 
 model Server {
@@ -41,12 +41,14 @@ model Server {
 }
 
 model Admin {
-  id      Int    @id @default(autoincrement())
-  steamID String @unique @db.VarChar(32)
-  userID  Int    @unique
-  flags   Int
+  id       Int    @id @default(autoincrement())
+  steamID  String @unique @db.VarChar(32)
+  userID   Int    @unique
+  flags    Int
+  immunity Int
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userID], references: [id])
 
@@ -62,7 +64,7 @@ model PlayerInfo {
   steamID64 String @db.VarChar(32)
   ip        String @db.VarChar(32)
 
-  bans Ban[]
+  bans Ban?
 }
 
 model Ban {
@@ -83,7 +85,7 @@ model Ban {
 
   targetInfo PlayerInfo @relation(fields: [targetInfoID], references: [id]) // Info about the target client
   admin      Admin      @relation(fields: [adminID], references: [id])
-  unban      Unban?     @relation(fields: [unbanID], references: [id])
+  unban      Unban?
   server     Server?    @relation(fields: [serverID], references: [id])
 }
 
@@ -91,12 +93,12 @@ model Unban {
   id      Int    @id @default(autoincrement())
   adminID Int
   reason  String
+  banID   Int    @unique
 
   createdAt DateTime @default(now())
 
   admin Admin @relation(fields: [adminID], references: [id])
-
-  bans Ban[]
+  ban   Ban   @relation(fields: [banID], references: [id])
 }
 
 enum BanType {

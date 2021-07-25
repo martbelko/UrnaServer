@@ -11,11 +11,11 @@ export function generateSalt(): string {
 }
 
 export function hashSalt(salt: string): string {
-    return Buffer.from(salt, 'base64').toString();
+    return Buffer.from(salt).toString('base64');
 }
 
-export function unhashSalt(hashedSalt: Array<number>): string {
-    return Buffer.from(hashedSalt).toString('base64');
+export function unhashSalt(hashedSalt: string): string {
+    return Buffer.from(hashedSalt, 'base64').toString();
 }
 
 export function hashPassword(password: string, salt: string): string {

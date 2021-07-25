@@ -25,4 +25,53 @@ router.get('/api/unbans/:id', async (req, res) => {
     res.send(JSON.stringify(unban));
 });
 
+router.post('/api/unbans', async (req, res) => {
+    if (req.body.banid == undefined) {
+        res.send({ error: '\'banid\' property missing' });
+        return;
+    }
+
+    const banID = Number(req.body.banid as string);
+    if (isNaN(banID)) {
+        res.send({ error: `'banid' property must be a number, but was '${req.body.banid}'` });
+        return;
+    }
+
+    const steamid = req.body.steamid as string;
+    if (steamid == undefined) {
+        res.send({ error: '\'steamid\' property missing' });
+        return;
+    }
+
+    const reason = req.body.reason as string;
+    if (reason == undefined) {
+        res.send({ error: '\'reason\' property missing' });
+        return;
+    }
+
+    try {
+        const ban = await prisma.ban.update({
+            where: {
+                id: banID
+            },
+            data: {
+                unban: {
+                    create: {
+                        reason: reason,
+                        admin: {
+                            connect: {
+                                steamID: steamid
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        res.send({ ban: ban });
+    } catch (e) {
+        res.send({ error: e });
+    }
+});
+
 export default router;

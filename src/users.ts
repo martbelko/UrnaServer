@@ -9,57 +9,91 @@ import { TextEncoder } from 'util';
 const prisma = new PrismaClient();
 export const router = express.Router();
 
-router.get('/api/users', async (req, res) => {
+interface UserGet {
+    id: number;
+    name: string;
+    email: string;
+}
+
+router.get('/api/users', (req, res, next) => {
     const id = Number(req.query.id as string);
     const name = req.query.name as string;
     const email = req.query.email as string;
 
+    req.params = { id: isNaN(id) ? undefined : id, name: name, email: email } as UserGet;
+    next();
+},
+async (req, res) => {
+    const user = req.params as UserGet;
     const users = await prisma.user.findMany({
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            createdAt: true,
+            updatedAt: true
+        },
         where: {
-            id: isNaN(id) ? undefined : id,
-            name: name,
-            email: email
+            ...user
         }
     });
 
     res.send(JSON.stringify(users));
 });
 
-router.post('/api/users', async (req, res) => {
+interface UserPost {
+    name: string;
+    email: string;
+    password: Array<number>;
+    salt: string;
+}
+
+router.post('/api/users', (req, res, next) => {
     if (req.body instanceof Array) {
-        res.send('Can insert only 1 user');
-        return;
+        return res.send({ error: 'Can insert only 1 user' });
     }
 
-    const user = req.body;
+    const name = req.body.name as string;
+    const email = req.body.email as string;
+    const password = req.body.password as string;
+
     {
-        const nameError = validateUserName(user.name);
+        const nameError = validateUserName(name);
         if (nameError != null) {
-            res.send({ error: nameError });
-            return;
+            return res.send({ error: nameError });
         }
     }
 
     {
-        const emailError = validateUserEmail(user.email);
+        const emailError = validateUserEmail(email);
         if (emailError != null) {
-            res.send({ error: emailError });
-            return;
+            return res.send({ error: emailError });
         }
     }
 
     {
-        const passwordError = validatePassword(user.password);
+        const passwordError = validatePassword(password);
         if (passwordError != null) {
-            res.send({ error: passwordError });
-            return;
+            return res.send({ error: passwordError });
         }
     }
 
     const salt = generateSalt();
-    const hashedPassword = new TextEncoder().encode(hashPassword(user.password, salt));
+    const hashedPassword = new TextEncoder().encode(hashPassword(password, salt));
     const hashedSalt = hashSalt(salt);
 
+    const user: UserPost = {
+        name: req.body.name,
+        email: req.body.email,
+        password: Array.from(hashedPassword),
+        salt: hashedSalt
+    };
+
+    req.params = user;
+    next();
+},
+async (req, res) => {
+    const user = req.params as UserPost;
     try {
         const insertedUser = await prisma.user.create({
             data: {
@@ -67,8 +101,8 @@ router.post('/api/users', async (req, res) => {
                 email: user.email,
                 password: {
                     create: {
-                        password: Array.from(hashedPassword),
-                        salt: hashedSalt
+                        password: user.password,
+                        salt: user.salt
                     }
                 }
             }
