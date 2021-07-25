@@ -43,9 +43,9 @@ model Server {
 model Admin {
   id       Int    @id @default(autoincrement())
   steamID  String @unique @db.VarChar(32)
-  userID   Int    @unique
   flags    Int
   immunity Int
+  userID   Int    @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
