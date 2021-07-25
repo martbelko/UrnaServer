@@ -1,7 +1,7 @@
 const minPasswordLen = 8;
 const maxPasswordLen = 100;
 
-const allowedPasswordChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+const allowedPasswordChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/*\\-=,.[]|';
 
 function containsCapital(str: string): boolean {
     const capitals = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

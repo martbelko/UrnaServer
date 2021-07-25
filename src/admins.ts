@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import express from 'express';
 
 import { validateFlags, validateImmunity, validateSteamID } from './validators/adminValidator';
-import { PrismaClientValidationError } from '@prisma/client/runtime';
+import { generateErrorFromPrismaException } from './error';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
@@ -84,7 +84,7 @@ router.post('/api/admins', (req, res, next) => {
     const userid = Number(useridStr);
 
     {
-        const error = validateSteamID(steamid);
+        const error = validateSteamID(steamid, 'steamid');
         if (error != null) {
             return res.send({ error: error });
         }
@@ -118,6 +118,18 @@ async (req, res) => {
     const admin = req.params as AdminPost;
     try {
         const insertedAdmin = await prisma.admin.create({
+            select: {
+                steamID: true,
+                flags: true,
+                immunity: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                }
+            },
             data: {
                 steamID: admin.steamid,
                 flags: admin.flags,
@@ -132,27 +144,29 @@ async (req, res) => {
 
         res.send({ admin: insertedAdmin });
     } catch (e) {
-        if (e instanceof PrismaClientValidationError) {
-            const index = e.message.search('\n\nArgument flags:') + 2;
-            const message = e.message.substring(index, e.message.length - 2);
-            return res.send({ error: message });
-        }
-
-        return res.send({ error: e });
+        const error = generateErrorFromPrismaException(e);
+        return res.status(error.status).send({ error: error });
     }
 });
 
-router.patch('/api/admins/:id', async (req, res) => {
-    const id = Number(req.params.id);
+interface AdminPatch {
+    id: number;
+    steamid: string | undefined;
+    flags: number | undefined;
+    immunity: number | undefined;
+}
+
+router.patch('/api/admins/:id', (req, res, next) => {
+    const id = Number(req.params.id as string);
     if (isNaN(id)) {
         return res.send({ error: `'id' property must be a number, but was '${req.params.id}'` });
     }
 
     const steamid = req.body.steamid as string;
     if (steamid != undefined) {
-        const error = validateSteamID(steamid);
+        const error = validateSteamID(steamid, 'steamid');
         if (error != null) {
-            return res.send({ error: error });
+            return res.status(error.status).send({ error: error });
         }
     }
 
@@ -164,47 +178,48 @@ router.patch('/api/admins/:id', async (req, res) => {
         }
     }
 
-    {
-        const admin = await prisma.admin.findFirst({
-            where: {
-                id: id
-            }
-        });
-
-        if (admin?.steamID == 'CONSOLE') {
-            return res.send({ error: 'Cannot update admin \'CONSOLE\'' });
+    const immunity = req.body.immunity == undefined ? undefined : Number(req.body.immunity as string);
+    if (immunity != undefined) {
+        const error = validateImmunity(immunity);
+        if (error != null) {
+            return res.send({ error: error });
         }
     }
 
-    const admin = await prisma.admin.update({
-        where: {
-            id: id
-        },
-        data: {
-            steamID: steamid,
-            flags: flags
-        }
-    });
+    const admin: AdminPatch = {
+        id: id,
+        steamid: steamid,
+        flags: flags,
+        immunity: immunity
+    };
+    req.body = admin;
+    next();
+},
+async (req, res) => {
+    const admin = req.body as AdminPatch;
+    try {
+        const updatedAdmin = await prisma.admin.update({
+            where: {
+                id: admin.id
+            },
+            data: {
+                steamID: admin.steamid,
+                flags: admin.flags,
+                immunity: admin.immunity
+            }
+        });
 
-    return res.send({ admin: admin });
+        return res.send({ admin: updatedAdmin });
+    } catch (e) {
+        const error = generateErrorFromPrismaException(e);
+        return res.status(error.status).send({ error: error });
+    }
 });
 
 router.delete('/api/admins/:id', async (req, res) => {
     const id = Number(req.params.id);
     if (isNaN(id)) {
         return res.send({ error: `'id' must be a number, but was '${req.params.id}'` });
-    }
-
-    {
-        const admin = await prisma.admin.findFirst({
-            where: {
-                id: id
-            }
-        });
-
-        if (admin?.steamID == 'CONSOLE') {
-            return res.send({ error: 'Cannot delete admin \'CONSOLE\'' });
-        }
     }
 
     try {
@@ -216,7 +231,8 @@ router.delete('/api/admins/:id', async (req, res) => {
 
         return res.send({ admin: admin });
     } catch (e) {
-        return res.send({ error: e });
+        const error = generateErrorFromPrismaException(e);
+        return res.status(error.status).send({ error: error });
     }
 });
 

@@ -5,6 +5,7 @@ import { generateSalt, hashPassword, hashSalt } from './database';
 import { validateUserEmail, validateUserName } from './validators/userValidator';
 import { validatePassword } from './validators/passwordValidator';
 import { TextEncoder } from 'util';
+import { generateErrorFromPrismaException } from './error';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
@@ -96,6 +97,11 @@ async (req, res) => {
     const user = req.params as UserPost;
     try {
         const insertedUser = await prisma.user.create({
+            select: {
+                id: true,
+                name: true,
+                email: true
+            },
             data: {
                 name: user.name,
                 email: user.email,
@@ -110,7 +116,8 @@ async (req, res) => {
 
         res.send({ user: insertedUser });
     } catch (e) {
-        res.send({ error: e });
+        const error = generateErrorFromPrismaException(e);
+        res.send({ error: error });
     }
 });
 
