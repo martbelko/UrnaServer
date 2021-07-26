@@ -7,6 +7,20 @@ export interface BaseError {
     detail: string; // Authentication failed due to incorrect username or password.
 }
 
+export class NullError implements BaseError {
+    type = '';
+    title = '';
+    status = 0;
+    detail = '';
+
+    constructor(paramName: string) {
+        this.type = ErrorType.WasNull;
+        this.title = `Invalid ${paramName} parameter`;
+        this.status = 401;
+        this.detail = `Missing ${paramName} parameter`;
+    }
+}
+
 export enum ErrorType {
     WasNull = '/errors/null',
     InvalidPassword = '/errors/invalid-password',
@@ -17,6 +31,9 @@ export enum ErrorType {
     InvalidFlags = '/errors/invalid-flags',
     InvalidImmunity = '/errors/invalid-immunity',
     InvalidBanType = '/errors/invalid-ban-type',
+    InvalidBanLength = '/errors/invalid-ban-length',
+    InvalidBanReason = '/errors/invalid-ban-reason',
+    InvalidVipMode = '/errors/invalid-vip-mode',
     PrismaClientInitializationError = '/errors/prisma-clien-initialization',
     PrismaClientKnownRequestError = '/errors/prisma-client-known-request',
     PrismaClientRustPanicError = '/errors/prisma-client-rust-panic',

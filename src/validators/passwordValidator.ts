@@ -1,3 +1,5 @@
+import BaseError, { ErrorType, NullError } from '../error';
+
 const minPasswordLen = 8;
 const maxPasswordLen = 100;
 
@@ -33,24 +35,74 @@ function containsLower(str: string): boolean {
     return false;
 }
 
-export function validatePassword(password: string): string | null {
-    if (password == undefined || password == null)
-        return 'Password was null';
-    if (password.length < minPasswordLen)
-        return `Password needs to contain at least ${minPasswordLen} characters. Contains: ${password.length}`;
-    if (password.length > maxPasswordLen)
-        return `Password needs to contain maximum ${maxPasswordLen} characters. Contains: ${password.length}`;
+export function validatePassword(password: string, paramName: string): BaseError | null {
+    if (password == undefined || password == null) {
+        return new NullError(paramName);
+    }
 
-    if (!containsCapital(password))
-        return 'Password does not contain capital letter';
-    if (!containsNumber(password))
-        return 'Password does not contain number';
-    if (!containsLower(password))
-        return 'Password does not contain lower letter';
+    const errorTitle = `Invalid ${paramName} parameter`;
+    const errorStatus = 401;
+
+    if (password.length < minPasswordLen) {
+        const error: BaseError = {
+            type: ErrorType.InvalidPassword,
+            title: errorTitle,
+            status: errorStatus,
+            detail: `Password needs to contain at least ${minPasswordLen} characters`
+        };
+        return error;
+    }
+
+    if (password.length > maxPasswordLen) {
+        const error: BaseError = {
+            type: ErrorType.InvalidPassword,
+            title: errorTitle,
+            status: errorStatus,
+            detail: `Password needs to contain maximum ${maxPasswordLen} characters`
+        };
+        return error;
+    }
+
+    if (!containsCapital(password)) {
+        const error: BaseError = {
+            type: ErrorType.InvalidPassword,
+            title: errorTitle,
+            status: errorStatus,
+            detail: 'Password does not contain capital letter'
+        };
+        return error;
+    }
+
+    if (!containsNumber(password)) {
+        const error: BaseError = {
+            type: ErrorType.InvalidPassword,
+            title: errorTitle,
+            status: errorStatus,
+            detail: 'Password does not contain number'
+        };
+        return error;
+    }
+
+    if (!containsLower(password)) {
+        const error: BaseError = {
+            type: ErrorType.InvalidPassword,
+            title: errorTitle,
+            status: errorStatus,
+            detail: 'Password does not contain lower letter'
+        };
+        return error;
+    }
 
     for (const ch of password) {
-        if (!allowedPasswordChars.includes(ch))
-            return `Password contain invalid char '${ch}'`;
+        if (!allowedPasswordChars.includes(ch)) {
+            const error: BaseError = {
+                type: ErrorType.InvalidPassword,
+                title: errorTitle,
+                status: errorStatus,
+                detail: 'Password contain invalid character'
+            };
+            return error;
+        }
     }
 
     return null;

@@ -35,7 +35,9 @@ async (req, res) => {
             updatedAt: true
         },
         where: {
-            ...user
+            id: user.id,
+            name: user.name,
+            email: user.email
         }
     });
 
@@ -59,23 +61,23 @@ router.post('/api/users', (req, res, next) => {
     const password = req.body.password as string;
 
     {
-        const nameError = validateUserName(name);
-        if (nameError != null) {
-            return res.send({ error: nameError });
+        const error = validateUserName(name, 'name');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
         }
     }
 
     {
-        const emailError = validateUserEmail(email);
-        if (emailError != null) {
-            return res.send({ error: emailError });
+        const error = validateUserEmail(email, 'email');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
         }
     }
 
     {
-        const passwordError = validatePassword(password);
-        if (passwordError != null) {
-            return res.send({ error: passwordError });
+        const error = validatePassword(password, 'password');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
         }
     }
 
@@ -119,6 +121,14 @@ async (req, res) => {
         const error = generateErrorFromPrismaException(e);
         res.send({ error: error });
     }
+});
+
+router.patch('/api/users/:id', (req, res, next) => {
+    const id = req.params.id;
+    next();
+},
+(req, res) => {
+    return res.send('OK');
 });
 
 export default router;

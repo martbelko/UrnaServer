@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
+import { NullError } from './error';
 import { validateIP } from './validators/serverValidator';
 
 const prisma = new PrismaClient();
@@ -29,21 +30,15 @@ router.get('/api/servers/:id', async (req, res) => {
 router.post('/api/servers', async (req, res) => {
     const name = req.body.name as string;
     if (name == undefined) {
-        res.send({ error: '\'name\' property missing' });
-        return;
+        const error = new NullError('name');
+        return res.status(error.status).send({ error: error });
     }
 
     const ip = req.body.ip as string;
-    if (ip == undefined) {
-        res.send({ error: '\'ip\' property missing' });
-        return;
-    }
-
     {
-        const ipError = validateIP(ip);
-        if (ipError != null) {
-            res.send({ error: ipError });
-            return;
+        const error = validateIP(ip, 'ip');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
         }
     }
 

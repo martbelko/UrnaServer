@@ -101,10 +101,22 @@ model Unban {
   ban   Ban   @relation(fields: [banID], references: [id])
 }
 
+model Vip {
+  id          Int     @id @default(autoincrement())
+  steamid     String  @db.VarChar(32)
+  vipMode     VipMode
+  email       String
+  discordName String?
+}
+
 enum BanType {
-  NONE
   NORMAL
   CT
   GAG
   MUTE
+}
+
+enum VipMode {
+  CLASSIC
+  EXTRA
 }

@@ -1,6 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
-import { BanType } from '.prisma/client';
+import { validateBanLength, validateBanReason } from './validators/banValidator';
+import { validateIP } from './validators/serverValidator';
+import { parseBanType } from './enums';
+import { NullError } from './error';
+import { validateSteamID } from './validators/adminValidator';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
@@ -10,15 +14,6 @@ interface Admin {
     steamid: string | undefined;
     name: string | undefined;
     email: string | undefined;
-}
-
-function parseBanType(typeStr: string): BanType {
-    if (typeStr === 'NORMAL') { return BanType.NORMAL; }
-    if (typeStr === 'CT') { return BanType.CT; }
-    if (typeStr === 'GAG') { return BanType.GAG; }
-    if (typeStr === 'MUTE') { return BanType.MUTE; }
-
-    return BanType.NONE;
 }
 
 type SortOrder = 'asc' | 'desc';
@@ -97,88 +92,91 @@ router.get('/api/bans', async (req, res) => {
     }
 */
 router.post('/api/bans', async (req, res) => {
-    if (req.body.type == undefined) {
-        res.send({ error: '\'type\' property is not defined' });
-        return;
+    const typeStr = req.body.type;
+    if (typeStr == undefined) {
+        const error = new NullError('type');
+        return res.status(error.status).send({ error: error });
     }
 
-    const type = parseBanType(req.body.type as string);
-    if (type == BanType.NONE) {
-        res.send({ error: `'type' property might be on of these: [NORMAL, CT, GAG, MUTE], but was '${req.body.type}'` });
+    const type = parseBanType(typeStr);
+    if (type == undefined) {
+        const error = new NullError('type');
+        return res.status(error.status).send({ error: error });
     }
 
-    const adminSteamid = req.body.adminSteamID as string;
-    if (adminSteamid == undefined) {
-        res.send({ error: '\'adminSteamID\' property is missing' });
-        return;
-    }
-
-    /*const admin = await prisma.admin.findFirst({
-        where: {
-            steamID: adminSteamid
+    const adminSteamid = req.body.adminSteamid as string;
+    {
+        const error = validateSteamID(adminSteamid, 'adminSteamid');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
         }
-    });
-
-    if (admin == null) {
-        res.send({ error: `admin with steamid '${adminSteamid}' was not found` });
-        return;
-    }*/
+    }
 
     const targetInfoJson = req.body.target;
     if (targetInfoJson == undefined) {
-        res.send({ error: 'Missing property \'target\'' });
-        return;
+        const error = new NullError('target');
+        return res.status(error.status).send({ error: error });
     }
 
-    const targetSteamID = targetInfoJson.steamID;
-    const targetSteam3ID = targetInfoJson.steam3ID;
-    const targetSteam64ID = targetInfoJson.steam64ID;
+    const targetSteamID = targetInfoJson.steamid;
+    const targetSteam3ID = targetInfoJson.steam3id;
+    const targetSteam64ID = targetInfoJson.steam64id;
     const targetIP = targetInfoJson.ip;
     const targetName = targetInfoJson.name;
 
-    if (targetSteamID == undefined) {
-        res.send({ error: 'Missing property \'target.steamID\'' });
-        return;
+    {
+        const error = validateSteamID(targetSteamID, 'target.steamid');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
+        }
     }
 
     if (targetSteam3ID == undefined) {
-        res.send({ error: 'Missing property \'target.steam3ID\'' });
-        return;
+        const error = new NullError('target.steam3id');
+        return res.status(error.status).send({ error: error });
     }
 
     if (targetSteam64ID == undefined) {
-        res.send({ error: 'Missing property \'target.steam64ID\'' });
-        return;
+        const error = new NullError('target.steam64id');
+        return res.send({ error: error });
     }
 
-    if (targetIP == undefined) {
-        res.send({ error: 'Missing property \'target.ip\'' });
-        return;
+    {
+        const error = validateIP(targetIP, 'target.ip');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
+        }
     }
 
     if (targetName == undefined) {
-        res.send({ error: 'Missing property \'target.name\'' });
-        return;
+        const error = new NullError('target.name');
+        return res.status(error.status).send({ error: error });
     }
 
-    if (req.body.length == undefined) {
-        res.send({ error: 'Missing property \'length\'' });
-        return;
+    const lengthStr = req.body.length as string;
+    {
+        const error = validateBanLength(lengthStr, 'length');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
+        }
     }
-
-    const length = Number(req.body.length as string);
-    if (isNaN(length)) {
-        res.send({ error: `Property 'length' must be a number, but was ${req.body.length}` });
-        return;
-    }
+    const length = Number(lengthStr);
 
     const reason = req.body.reason as string;
-    if (reason == undefined) {
-        res.send({ error: 'Missing property \'reason\'' });
-        return;
+    {
+        const error = validateBanReason(reason, 'reason');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
+        }
     }
 
-    const serverIP = req.body.serverIP as string;
+    const serverIP = req.body.serverip as string;
+    {
+        const error = validateIP(serverIP, 'serverip');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
+        }
+    }
 
     try {
         const ban = await prisma.ban.create({
@@ -208,10 +206,9 @@ router.post('/api/bans', async (req, res) => {
             }
         });
 
-        res.send({ ban: ban });
+        return res.send({ ban: ban });
     } catch (e) {
-        res.send({ error: e });
-        return;
+        return res.send({ error: e });
     }
 });
 

@@ -1,19 +1,18 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
-import bodyParser from 'body-parser';
 import cors from 'cors';
 import https from 'https';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
-
 import adminRouter from './admins';
 import userRouter from './users';
 import bansRouter from './bans';
 import playerInfoRouter from './playerInfo';
 import unbansRouter from './unbans';
-import serversRoutes from './servers';
+import serversRouter from './servers';
+import vipsRouter from './vips';
 import { hashPassword, unhashSalt } from './database';
 import { TextDecoder } from 'util';
 
@@ -24,10 +23,10 @@ const port = 5000;
 
 dotenv.config();
 
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors());
 app.get('/', async (req, res) => {
-    res.send('Available routers: \
+    res.send('Available routes: \
     [\'/api/admins\', \'/api/users\', \'/api/bans\',\
     \'/api/playerInfo/:id\', \'/api/servers/:id\',\
     \'/api/unbans/:id\']');
@@ -56,8 +55,11 @@ app.get('/api/playerInfo/:id', playerInfoRouter);
 app.get('/api/unbans/:id', unbansRouter);
 app.post('/api/unbans', unbansRouter);
 
-app.get('/api/servers/:id', serversRoutes);
-app.post('/api/servers', serversRoutes);
+app.get('/api/servers/:id', serversRouter);
+app.post('/api/servers', serversRouter);
+
+app.get('/api/vips', vipsRouter);
+app.post('/api/vips', vipsRouter);
 
 app.post('/test', (req, res) => {
 

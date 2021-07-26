@@ -91,16 +91,16 @@ router.post('/api/admins', (req, res, next) => {
     }
 
     {
-        const error = validateFlags(flags);
+        const error = validateFlags(flags, 'flags');
         if (error != null) {
-            return res.send({ error: error });
+            return res.status(error.status).send({ error: error });
         }
     }
 
     {
-        const error = validateImmunity(immunity);
+        const error = validateImmunity(immunity, 'immunity');
         if (error != null) {
-            return res.send({ error: error });
+            return res.status(error.status).send({ error: error });
         }
     }
 
@@ -172,17 +172,17 @@ router.patch('/api/admins/:id', (req, res, next) => {
 
     const flags = req.body.flags == undefined ? undefined : Number(req.body.flags as string);
     if (flags != undefined) {
-        const error = validateFlags(flags);
+        const error = validateFlags(flags, 'flags');
         if (error != null) {
-            return res.send({ error: error });
+            return res.status(error.status).send({ error: error });
         }
     }
 
     const immunity = req.body.immunity == undefined ? undefined : Number(req.body.immunity as string);
     if (immunity != undefined) {
-        const error = validateImmunity(immunity);
+        const error = validateImmunity(immunity, 'immunity');
         if (error != null) {
-            return res.send({ error: error });
+            return res.status(error.status).send({ error: error });
         }
     }
 

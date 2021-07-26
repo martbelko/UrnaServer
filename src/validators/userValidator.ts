@@ -1,3 +1,5 @@
+import BaseError, { ErrorType, NullError } from '../error';
+
 const minUserNameLen = 6;
 const maxUserNameLen = 100;
 
@@ -6,26 +8,62 @@ const allowedNameChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ12
 // eslint-disable-next-line no-useless-escape
 const emailRegex = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
-export function validateUserName(name: string): string | null {
-    if (name == undefined || name == null)
-        return 'Name was null';
+export function validateUserName(name: string, paramName: string): BaseError | null {
+    if (name == undefined || name == null) {
+        return new NullError(paramName);
+    }
 
-    if (name.length < minUserNameLen)
-        return `Name needs to contain at least ${minUserNameLen} characters. Contains: ${name.length}`;
-    if (name.length > maxUserNameLen)
-        return `Name needs to contain maximum ${maxUserNameLen} characters. Contains: ${name.length}`;
+    const errorTitle = `Invalid ${paramName} parameter`;
+    const errorStatus = 401;
+    if (name.length < minUserNameLen) {
+        const error: BaseError = {
+            type: ErrorType.InvalidUsername,
+            title: errorTitle,
+            status: errorStatus,
+            detail: `${paramName} parameter needs to contain at least ${minUserNameLen} characters, but contains: ${name.length}`
+        };
+        return error;
+    }
+
+    if (name.length > maxUserNameLen) {
+        const error: BaseError = {
+            type: ErrorType.InvalidUsername,
+            title: errorTitle,
+            status: errorStatus,
+            detail: `${paramName} parameter needs to contain maximum ${maxUserNameLen} characters, but contains: ${name.length}`
+        };
+        return error;
+    }
 
     for (const ch of name) {
-        if (!allowedNameChars.includes(ch))
-            return `Name contains invalid char '${ch}'`;
+        if (!allowedNameChars.includes(ch)) {
+            const error: BaseError = {
+                type: ErrorType.InvalidUsername,
+                title: errorTitle,
+                status: errorStatus,
+                detail: `${paramName} parameter contains invalid char '${ch}'`
+            };
+            return error;
+        }
     }
 
     return null;
 }
 
-export function validateUserEmail(email: string): string | null {
-    if (email == undefined || email == null)
-        return 'Email was null';
+export function validateUserEmail(email: string, paramName: string): BaseError | null {
+    if (email == undefined || email == null) {
+        return new NullError(paramName);
+    }
 
-    return emailRegex.test(email) ? null : 'Invalid email format';
+    if (!emailRegex.test(email)) {
+        const error: BaseError = {
+            type: ErrorType.InvalidEmail,
+            title: `Invalid ${paramName} parameter`,
+            status: 401,
+            detail: `${paramName} parameter is invalid email`
+        };
+        return error;
+    }
+
+    return null;
 }
