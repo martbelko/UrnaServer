@@ -23,7 +23,9 @@ export class NullError implements BaseError {
 
 export enum ErrorType {
     WasNull = '/errors/null',
+    InvalidID = '/errors/invalid-id',
     InvalidPassword = '/errors/invalid-password',
+    PasswordsMismatch = '/errors/passwords-mismatch',
     InvalidUsername = '/errors/invalid-username',
     InvalidEmail = '/errors/invalid-email',
     InvalidIp = '/errors/invalid-ip',

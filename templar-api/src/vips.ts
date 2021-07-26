@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
-import { validateUserEmail } from './validators/userValidator';
 import { validateSteamID } from './validators/adminValidator';
 import { parseVipMode } from './enums';
 import BaseError, { ErrorType, NullError } from './error';
@@ -11,17 +10,15 @@ export const router = express.Router();
 router.get('/api/vips', async (req, res) => {
     const id = Number(req.query.id as string);
     const mode = parseVipMode(req.query.mode as string);
-    const email = req.query.email as string;
     const steamid = req.query.steamid as string;
-    const discordName = req.query.discordName as string;
+    const userid = Number(req.query.userid as string);
 
     const vips = await prisma.vip.findMany({
         where: {
             id: Number.isNaN(id) ? undefined : id,
             vipMode: mode,
-            email: email,
             steamid: steamid,
-            discordName: discordName
+            userid: isNaN(userid) ? undefined : userid
         }
     });
 
@@ -46,14 +43,6 @@ router.post('/api/vips', async (req, res) => {
         return res.status(error.status).send({ error: error });
     }
 
-    const email = req.body.email as string;
-    {
-        const error = validateUserEmail(email, 'email');
-        if (error != null) {
-            return res.status(error.status).send({ error: error });
-        }
-    }
-
     const steamid = req.body.steamid as string;
     {
         const error = validateSteamID(steamid, 'steamid');
@@ -62,15 +51,29 @@ router.post('/api/vips', async (req, res) => {
         }
     }
 
-    const discordName = req.body.discordName as string | undefined;
+    const useridStr = req.body.userid as string;
+    if (useridStr == undefined) {
+        const error = new NullError('userid');
+        return res.status(error.status).send({ error: error });
+    }
+
+    const userid = Number(useridStr);
+    if (isNaN(userid)) {
+        const error: BaseError = {
+            type: ErrorType.InvalidID,
+            title: 'Invalid userid parameter',
+            status: 401,
+            detail: `userid parameter must be a number, but was ${useridStr}`
+        };
+        return res.status(error.status).send({ error: error });
+    }
 
     try {
         const vip = await prisma.vip.create({
             data: {
                 vipMode: mode,
-                email: email,
                 steamid: steamid,
-                discordName: discordName
+                userid: userid
             }
         });
 

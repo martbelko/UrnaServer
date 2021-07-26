@@ -5,7 +5,7 @@ import { generateSalt, hashPassword, hashSalt } from './database';
 import { validateUserEmail, validateUserName } from './validators/userValidator';
 import { validatePassword } from './validators/passwordValidator';
 import { TextEncoder } from 'util';
-import { generateErrorFromPrismaException } from './error';
+import BaseError, { ErrorType, generateErrorFromPrismaException } from './error';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
@@ -123,12 +123,111 @@ async (req, res) => {
     }
 });
 
+interface UserPatch {
+    id: number;
+    name: string | undefined;
+    email: string | undefined;
+    password: Array<number> | undefined;
+    salt: string | undefined;
+}
+
 router.patch('/api/users/:id', (req, res, next) => {
-    const id = req.params.id;
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        const error: BaseError = {
+            type: ErrorType.InvalidID,
+            title: 'Invalid id parameter',
+            status: 401,
+            detail: `id paramter must be a number, but was ${req.params.id}`
+        };
+        return res.status(error.status).send({ error: error });
+    }
+
+    const name = req.body.name as string;
+    if (name != undefined) {
+        const error = validateUserName(name, 'name');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
+        }
+    }
+
+    const email = req.body.email as string;
+    if (email != null) {
+        const error = validateUserEmail(email, 'email');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
+        }
+    }
+
+    const password = req.body.password as string;
+    if (password != undefined) {
+        const error = validatePassword(password, 'password');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
+        }
+    }
+
+    const password2 = req.body.password2 as string;
+    if (password != undefined) {
+        if (password2 == undefined) {
+            const error: BaseError = {
+                type: ErrorType.WasNull,
+                title: 'Missing password2 parameter',
+                status: 401,
+                detail: 'password parameter was specified, but password2 parameter was not'
+            };
+            return res.status(error.status).send({ error: error });
+        }
+
+        if (password != password2) {
+            const error: BaseError = {
+                type: ErrorType.PasswordsMismatch,
+                title: 'passwords did not match',
+                status: 401,
+                detail: 'password parameter and password2 parameter did not match'
+            };
+            return res.status(error.status).send({ error: error });
+        }
+    }
+
+    let hashedPassword: Uint8Array | undefined = undefined;
+    let hashedSalt: string | undefined = undefined;
+    if (password != undefined) {
+        const salt = generateSalt();
+        hashedPassword = new TextEncoder().encode(hashPassword(password, salt));
+        hashedSalt = hashSalt(salt);
+    }
+
+    const user: UserPatch = {
+        id: id,
+        name: name,
+        email: email,
+        password: hashedPassword && Array.from(hashedPassword),
+        salt: hashedSalt
+    };
+    req.body = user;
+
     next();
 },
-(req, res) => {
-    return res.send('OK');
+async (req, res) => {
+    const user = req.body as UserPatch;
+    const updatedUser = await prisma.user.update({
+        where: {
+            id: user.id
+        },
+        data: {
+            name: user.name,
+            email: user.email,
+            password: {
+                update: {
+                    password: user.password,
+                    salt: user.salt
+                }
+            }
+        }
+    });
+
+    return res.send({ user: updatedUser });
 });
 
 export default router;

@@ -22,6 +22,7 @@ model User {
   password Password @relation(fields: [passwordID], references: [id])
 
   admin Admin?
+  Vip   Vip[]
 }
 
 model Password {
@@ -102,11 +103,12 @@ model Unban {
 }
 
 model Vip {
-  id          Int     @id @default(autoincrement())
-  steamid     String  @db.VarChar(32)
-  vipMode     VipMode
-  email       String
-  discordName String?
+  id      Int     @id @default(autoincrement())
+  userid  Int
+  steamid String  @db.VarChar(32)
+  vipMode VipMode
+
+  buyer User @relation(fields: [userid], references: [id])
 }
 
 enum BanType {
