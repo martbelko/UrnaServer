@@ -46,6 +46,7 @@ app.delete('/api/admins/:id', adminRouter);
 
 app.get('/api/users', userRouter);
 app.post('/api/users', userRouter);
+app.patch('/api/users/:id', userRouter);
 
 app.get('/api/bans', bansRouter);
 app.post('/api/bans', bansRouter);
@@ -62,7 +63,6 @@ app.get('/api/vips', vipsRouter);
 app.post('/api/vips', vipsRouter);
 
 app.post('/test', (req, res) => {
-
     return res.send('OK');
 });
 
