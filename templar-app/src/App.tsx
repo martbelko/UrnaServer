@@ -1,9 +1,9 @@
 import React from 'react'
 import './App.css'
 
-import TemplarLogo from './assets/svgs/templar.svg';
-import InstagramLogo from './assets/svgs/instagram.svg';
-import BackgroundImage from './assets/background/sky.jpg';
+import TemplarLogo from '/assets/svgs/templar.svg';
+import InstagramLogo from '/assets/svgs/instagram.svg';
+import BackgroundImage from '/assets/background/sky.jpg';
 
 function App() {
   return (
