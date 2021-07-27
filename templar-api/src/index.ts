@@ -5,6 +5,7 @@ import https from 'https';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { MessageClient, MessageClientOptions } from 'cloudmailin';
 
 import adminRouter from './admins';
 import userRouter from './users';
@@ -19,6 +20,11 @@ import { TextDecoder } from 'util';
 export const prisma = new PrismaClient();
 
 const app = express();
+const x: MessageClientOptions = {
+    username: 'martbelko@gmail.com',
+    apiKey: 'Kat8qq9np7'
+};
+const emailClient = new MessageClient(x);
 const port = 5000;
 
 dotenv.config();
@@ -62,8 +68,42 @@ app.post('/api/servers', serversRouter);
 app.get('/api/vips', vipsRouter);
 app.post('/api/vips', vipsRouter);
 
-app.post('/test', (req, res) => {
-    return res.send('OK');
+function sendMail(req: any, res: any) {
+    const name = req.body.name;
+    const from = req.body.from;
+    const message = req.body.message;
+    const to = 'martbelko@gmail.com';
+    const smtpTransport = emailClient.createTransport('SMTP',{
+        service: 'Gmail',
+        auth: {
+            user: '******@gmail.com',
+            pass: '*****'
+        }
+    });
+    const mailOptions = {
+        from: from,
+        to: to,
+        subject: name+' | new message !',
+        text: message
+    };
+    smtpTransport.sendMail(mailOptions, function(error: any, response: any) {
+        if(error) {
+            console.log(error);
+        } else {
+            res.redirect('/');
+        }
+    });
+}
+
+app.get('/test', async (req, res) => {
+    const response = await emailClient.sendMessage({
+        to: 'martbelko@gmail.com',
+        from: 'martbelko@gmail.com',
+        plain: 'test message',
+        html:  '<h1>Test Message</h1>',
+        subject: 'hello world'
+    });
+    return res.send(response);
 });
 
 app.post('/api/login', async (req, res) => {
