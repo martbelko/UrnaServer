@@ -1,0 +1,25 @@
+.footer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+
+  height: var(--footer-height);
+  width: 100%;
+
+  backdrop-filter: blur(4px);
+}
+
+.footer__item {
+  height: 8vh;
+  filter: blur(0);
+}
+
+.footer__item--facebook {
+  height: 10vh;
+}

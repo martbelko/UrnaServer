@@ -1,0 +1,37 @@
+.header {
+  position: relative;
+  list-style-type: none;
+  background: var(--header-color);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  height: var(--header-height);
+}
+
+.header__item {
+  width: auto;
+  color: white;
+  height: var(--header-height);
+}
+
+.header__item--logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: var(--header-height);
+  width: var(--logo-width);
+}
+
+.header__item--title {
+  width: calc(100vw - var(--logo-width));
+  font-size: 2rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding-left: 15vw;
+}
+
+.header__item__logo {
+  height: 100%;
+}

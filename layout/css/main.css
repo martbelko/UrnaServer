@@ -1,0 +1,7 @@
+@import './colors.css';
+
+:root {
+  --logo-width: 30vw;
+  --header-height: 10vh;
+  --footer-height: 10vh;
+}

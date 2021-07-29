@@ -5,21 +5,27 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="Najlepší herný portál!">
 
-	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+
+	<link rel="stylesheet" type="text/css" href="css/styles/header.css">
+	<link rel="stylesheet" type="text/css" href="css/styles/footer.css">
+	<link rel="stylesheet" type="text/css" href="css/styles/background.css">
+	<link rel="stylesheet" type="text/css" href="css/styles/style.css">
 
 	<title>Templars</title>
 </head>
 
 <body>
-	<header>
-		<ul class="header">
-			<li class="header__item header__item--logo">
-				<img class="header__item__logo" src="assets/svgs/templar.svg" alt="Templar">
-			</li>
-			<li class="header__item header__item--name">Forum</li>
-		</ul>
+	<header class="header">
+		<div class="header__item header__item--logo">
+			<img class="header__item__logo" src="assets/svgs/helmet.svg" alt="Templay logo" />
+		</div>
+		<h1 class="header__item header__item--title">Fórum</h1>
 	</header>
+
 	<main class="main">
 		<div class="main__content">
 			<ul class="content__cards">
@@ -46,11 +52,13 @@
 	</main>
 
 	<footer class="footer">
-		<a href="https://www.instagram.com/mato.belko/"><img class="footer__instagram" src="assets/svgs/instagram.svg" alt="Instagram" /></a>
+		<a href="https://www.instagram.com/mato.belko/"><img class="footer__item" src="assets/svgs/instagram.svg" alt="Instagram" /></a>
+		<a href="https://www.instagram.com/mato.belko/"><img class="footer__item footer__item--facebook" src="assets/svgs/facebook.svg" alt="Facebook" /></a>
+		<a href="https://www.instagram.com/mato.belko/"><img class="footer__item" src="assets/svgs/discord.svg" alt="Facebook" /></a>
 	</footer>
 
 	<div class="background">
-		<img class="main__background" src="assets/background/sky.jpg" />
+		<img class="background__img" src="assets/background/sky.jpg" alt="Background" />
 		<div class="circle-container">
 			<div class="circle"></div>
 		</div>
