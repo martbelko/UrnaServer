@@ -8,15 +8,13 @@ export interface BaseError {
 }
 
 export class NullError implements BaseError {
-    type = '';
+    type = ErrorType.WasNull;
     title = '';
-    status = 0;
+    status = 500;
     detail = '';
 
     constructor(paramName: string) {
-        this.type = ErrorType.WasNull;
         this.title = `Invalid ${paramName} parameter`;
-        this.status = 401;
         this.detail = `Missing ${paramName} parameter`;
     }
 }

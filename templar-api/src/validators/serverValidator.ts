@@ -4,7 +4,7 @@ const ipRegex = new RegExp(/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[
 
 export function validateIP(ip: string, paramName: string): BaseError | null {
     const errorTitle = `Invalid ${paramName} parameter`;
-    const errorStatus = 401;
+    const errorStatus = 500;
 
     if (ip == undefined) {
         const error: BaseError = {

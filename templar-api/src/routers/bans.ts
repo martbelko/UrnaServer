@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
-import { validateBanLength, validateBanReason } from './validators/banValidator';
-import { validateIP } from './validators/serverValidator';
-import { parseBanType } from './enums';
-import { NullError } from './error';
-import { validateSteamID } from './validators/adminValidator';
+import { validateBanLength, validateBanReason } from './../validators/banValidator';
+import { validateIP } from './../validators/serverValidator';
+import { parseBanType } from './../enums';
+import { NullError } from './../error';
+import { validateSteamID } from './../validators/adminValidator';
 
 const prisma = new PrismaClient();
 export const router = express.Router();

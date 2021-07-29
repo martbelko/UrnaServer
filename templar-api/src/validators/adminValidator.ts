@@ -7,7 +7,7 @@ const maxImmunity = 100;
 
 export function validateSteamID(steamid: string, paramName: string): BaseError | null {
     const errorTitle = `Invalid ${paramName} parameter`;
-    const errorStatus = 401;
+    const errorStatus = 500;
 
     if (steamid == undefined || steamid == null)
         return {
@@ -30,7 +30,7 @@ export function validateSteamID(steamid: string, paramName: string): BaseError |
 
 export function validateFlags(flags: number, paramName: string): BaseError | null {
     const errorTitle = `Invalid ${paramName} parameter`;
-    const errorStatus = 401;
+    const errorStatus = 500;
 
     if (flags == null || flags == undefined) {
         const error: BaseError = {
@@ -66,7 +66,7 @@ export function validateFlags(flags: number, paramName: string): BaseError | nul
 
 export function validateImmunity(immunity: number, paramName: string): BaseError | null {
     const errorTitle = `Invalid ${paramName} parameter`;
-    const errorStatus = 401;
+    const errorStatus = 500;
 
     if (immunity == undefined) {
         const error: BaseError = {

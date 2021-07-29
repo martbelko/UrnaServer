@@ -1,14 +1,16 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
-
-import { generateSalt, hashPassword, hashSalt } from './database';
-import { validateUserEmail, validateUserName } from './validators/userValidator';
-import { validatePassword } from './validators/passwordValidator';
 import { TextEncoder } from 'util';
-import BaseError, { ErrorType, generateErrorFromPrismaException } from './error';
+
+import { generateSalt, hashPassword, hashSalt } from './../database';
+import { validateUserEmail, validateUserName } from './../validators/userValidator';
+import { validatePassword } from './../validators/passwordValidator';
+import BaseError, { ErrorType, generateErrorFromPrismaException } from './../error';
+import { validateAuthHeader } from '../utils/authValidator';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
+router.use(validateAuthHeader);
 
 interface UserGet {
     id: number;
@@ -16,12 +18,17 @@ interface UserGet {
     email: string;
 }
 
-router.get('/api/users', (req, res, next) => {
+router.get('/api/users', async (req, res, next) => {
+    const authUser = await validateAuthHeader(req.headers.authorization);
+    if (typeof authUser == 'number') {
+        return res.sendStatus(authUser);
+    }
+
     const id = Number(req.query.id as string);
     const name = req.query.name as string;
     const email = req.query.email as string;
-
     req.params = { id: isNaN(id) ? undefined : id, name: name, email: email } as UserGet;
+
     next();
 },
 async (req, res) => {
@@ -37,7 +44,9 @@ async (req, res) => {
         where: {
             id: user.id,
             name: user.name,
-            email: user.email
+            email: {
+                email: user.email
+            }
         }
     });
 
@@ -52,6 +61,8 @@ interface UserPost {
 }
 
 router.post('/api/users', (req, res, next) => {
+    const authUserid = 
+
     if (req.body instanceof Array) {
         return res.send({ error: 'Can insert only 1 user' });
     }
@@ -102,11 +113,20 @@ async (req, res) => {
             select: {
                 id: true,
                 name: true,
-                email: true
+                email: {
+                    select: {
+                        email: true,
+                        verified: false
+                    }
+                }
             },
             data: {
                 name: user.name,
-                email: user.email,
+                email: {
+                    create: {
+                        email: user.email
+                    }
+                },
                 password: {
                     create: {
                         password: user.password,
@@ -217,7 +237,11 @@ async (req, res) => {
         },
         data: {
             name: user.name,
-            email: user.email,
+            email: {
+                update: {
+                    email: user.email,
+                }
+            },
             password: {
                 update: {
                     password: user.password,

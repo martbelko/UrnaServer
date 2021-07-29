@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
-import { NullError } from './error';
-import { validateIP } from './validators/serverValidator';
+import { NullError } from './../error';
+import { validateIP } from './../validators/serverValidator';
 
 const prisma = new PrismaClient();
 export const router = express.Router();

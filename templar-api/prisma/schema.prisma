@@ -13,16 +13,36 @@ generator client {
 model User {
   id         Int    @id @default(autoincrement())
   name       String @unique
-  email      String @unique
+  emailID    Int    @unique
   passwordID Int    @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  password Password @relation(fields: [passwordID], references: [id])
+  password      Password      @relation(fields: [passwordID], references: [id])
+  email         VerifiedEmail @relation(fields: [emailID], references: [id])
+  refreshTokens RefreshToken[]
 
   admin Admin?
   Vip   Vip[]
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresIn Int // in seconds
+  userID    Int
+
+  user User @relation(fields: [userID], references: [id])
+}
+
+model VerifiedEmail {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  verified Boolean @default(false)
+
+  User User?
 }
 
 model Password {

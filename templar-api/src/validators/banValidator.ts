@@ -11,7 +11,7 @@ export function validateBanType(type: BanType | undefined, paramName: string): B
 
 export function validateBanLength(lengthStr: string, paramName: string): BaseError | null {
     const errorTitle = `Invalid ${paramName} parameter`;
-    const errorStatus = 401;
+    const errorStatus = 500;
 
     if (lengthStr == undefined) {
         return new NullError(paramName);

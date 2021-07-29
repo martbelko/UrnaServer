@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
 
-import { validateFlags, validateImmunity, validateSteamID } from './validators/adminValidator';
-import { generateErrorFromPrismaException } from './error';
+import { validateFlags, validateImmunity, validateSteamID } from './../validators/adminValidator';
+import { generateErrorFromPrismaException } from './../error';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
@@ -42,7 +42,9 @@ async (req, res) => {
             flags: admin.flags,
             user: {
                 name: admin.name,
-                email: admin.email
+                email: {
+                    email: admin.email
+                }
             }
         }
     });

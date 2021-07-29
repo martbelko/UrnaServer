@@ -41,7 +41,7 @@ export function validatePassword(password: string, paramName: string): BaseError
     }
 
     const errorTitle = `Invalid ${paramName} parameter`;
-    const errorStatus = 401;
+    const errorStatus = 500;
 
     if (password.length < minPasswordLen) {
         const error: BaseError = {

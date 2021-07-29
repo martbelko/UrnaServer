@@ -14,7 +14,7 @@ export function validateUserName(name: string, paramName: string): BaseError | n
     }
 
     const errorTitle = `Invalid ${paramName} parameter`;
-    const errorStatus = 401;
+    const errorStatus = 500;
     if (name.length < minUserNameLen) {
         const error: BaseError = {
             type: ErrorType.InvalidUsername,
@@ -59,7 +59,7 @@ export function validateUserEmail(email: string, paramName: string): BaseError |
         const error: BaseError = {
             type: ErrorType.InvalidEmail,
             title: `Invalid ${paramName} parameter`,
-            status: 401,
+            status: 500,
             detail: `${paramName} parameter is invalid email`
         };
         return error;

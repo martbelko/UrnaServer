@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
-import { validateSteamID } from './validators/adminValidator';
-import { parseVipMode } from './enums';
-import BaseError, { ErrorType, NullError } from './error';
+import { validateSteamID } from './../validators/adminValidator';
+import { parseVipMode } from './../enums';
+import BaseError, { ErrorType, NullError } from './../error';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
