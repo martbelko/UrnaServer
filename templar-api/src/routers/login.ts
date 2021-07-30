@@ -55,8 +55,8 @@ router.post('/auth/login', async (req, res) => {
     res.send({ accessToken: accessToken, refreshToken: refreshToken });
 });
 
-router.delete('/logout', (req, res) => {
-    // TODO: Delete refresh token
+router.delete('/auth/logout', (req, res) => {
+    // TODO: Delete refresh token from database
     res.sendStatus(204);
 });
 

@@ -10,7 +10,6 @@ import { validateAuthHeader } from '../utils/authValidator';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
-router.use(validateAuthHeader);
 
 interface UserGet {
     id: number;
@@ -19,7 +18,7 @@ interface UserGet {
 }
 
 router.get('/api/users', async (req, res, next) => {
-    const authUser = await validateAuthHeader(req.headers.authorization);
+    const authUser = validateAuthHeader(req.headers.authorization);
     if (typeof authUser == 'number') {
         return res.sendStatus(authUser);
     }
@@ -61,8 +60,6 @@ interface UserPost {
 }
 
 router.post('/api/users', (req, res, next) => {
-    const authUserid = 
-
     if (req.body instanceof Array) {
         return res.send({ error: 'Can insert only 1 user' });
     }

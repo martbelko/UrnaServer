@@ -16,22 +16,50 @@ import loginRouter from './routers/login';
 import authRouter from './routers/auth';
 import emailRouter from './routers/verifyEmail';
 
-import { validateAuthHeader } from './utils/authValidator';
+import { validateAuthHeader, validateDateHeader } from './utils/authValidator';
+
+dotenv.config();
 
 const prisma = new PrismaClient();
 
 const app = express();
 const port = Number(process.env.PORT as string);
 
-dotenv.config();
+const rateLimiter = new Map<string, number>();
+
+setInterval(() => {
+    rateLimiter.clear();
+}, 5000);
 
 app.use(express.json());
 app.use(cors());
+app.use((req, res, next) => {
+    const ip = req.ip || req.socket.remoteAddress;
+    if (ip == undefined) {
+        return res.sendStatus(401);
+    }
+
+    const number = rateLimiter.get(ip);
+    if (number == undefined) {
+        rateLimiter.set(ip, 1);
+    } else if (number < 1) {
+        rateLimiter.set(ip, number + 1);
+    } else {
+        return res.send({ error: 'Maximum requests exceeded' });
+    }
+
+    next();
+});
+app.use(validateDateHeader);
+app.enable('trust proxy');
+
 app.get('/', async (req, res) => {
-    res.send('Available routes: \
-    [\'/api/admins\', \'/api/users\', \'/api/bans\',\
-    \'/api/playerInfo/:id\', \'/api/servers/:id\',\
-    \'/api/unbans/:id\']');
+    const user = validateAuthHeader(req.headers.authorization);
+    if (typeof user == 'number') {
+        return res.sendStatus(user);
+    }
+
+    return res.send('OK');
 });
 
 const options = {
@@ -65,21 +93,12 @@ app.get('/api/vips', vipsRouter);
 app.post('/api/vips', vipsRouter);
 
 app.post('/auth/login', loginRouter);
-app.delete('/logut', loginRouter);
+app.delete('/auth/logut', loginRouter);
 
 app.post('/auth/token', authRouter);
 
 app.get('/api/verify-email/:token', emailRouter);
 app.post('/api/verify-email', emailRouter);
-
-app.get('/test', async (req, res) => {
-    const statusOrUser = await validateAuthHeader(req.headers.authorization);
-    if (typeof statusOrUser == 'number') {
-        return res.sendStatus(statusOrUser);
-    }
-
-    return res.send('OK');
-});
 
 async function main() {
     await prisma.refreshToken.deleteMany();

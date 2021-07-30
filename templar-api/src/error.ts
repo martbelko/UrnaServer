@@ -39,7 +39,9 @@ export enum ErrorType {
     PrismaClientRustPanicError = '/errors/prisma-client-rust-panic',
     PrismaClientValidationError = '/errors/prisma-client-validation',
     PrismaClientUnknownRequestError = '/errors/prisma-client-unknown-request',
-    UnknownExceptionError = '/errors/unknown-exception'
+    UnknownExceptionError = '/errors/unknown-exception',
+    InvalidTimestamp = '/errors/invalid-timestamp',
+    ExpiredTimestamp = '/errors/expired-timestamp'
 }
 
 export function generateErrorFromPrismaException(e: unknown): BaseError {
