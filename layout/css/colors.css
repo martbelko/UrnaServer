@@ -1,7 +1,8 @@
 :root {
-  --primary-font-color: white;
+  --primary-font-color: black;
 
-  --header-color: #333;
-
-  --card-font-color: white;
+  --header-bg-color: white;
+  --header-shadow-color: black;
+  --header-border-color: red;
+  --header-link-bg-active-color: green;
 }

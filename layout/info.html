@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Najlepší herný portál!">
+
+    <link rel="icon" href="assets/svgs/helmet.svg">
+
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+
+	<link rel="stylesheet" type="text/css" href="css/styles/header.css">
+	<link rel="stylesheet" type="text/css" href="css/styles/theme-switch.css">
+	<link rel="stylesheet" type="text/css" href="css/styles/main-info.css">
+	<link rel="stylesheet" type="text/css" href="css/styles/footer.css">
+
+    <title>Info | Templay</title>
+</head>
+<body>
+    <header class="header">
+        <div class="header__logo">
+            <img class="logo__img" src="./assets/svgs/helmet.svg" alt="Helmet">
+            <span class="logo__text">TEMPLAY</span>
+        </div>
+        <nav class="header__nav">
+            <ul class="nav__main-nav">
+                <li class="main-nav__item">
+                    <a class="main-nav__item__link" href="#">Úvod</a>
+                </li>
+                <li class="main-nav__item">
+                    <a class="main-nav__item__link" href="#">Servery</a>
+                </li>
+                <li class="main-nav__item">
+                    <a class="main-nav__item__link" href="#">Rád / Tím</a>
+                </li>
+                <li class="main-nav__item">
+                    <a class="main-nav__item__link" href="#">Nákup produktov</a>
+                </li>
+                <li class="main-nav__item">
+                    <a class="main-nav__item__link" href="#">Fórum</a>
+                </li>
+                <li class="main-nav__item">
+                    <a class="main-nav__item__link" href="#">Banlist</a>
+                </li>
+            </ul>
+        </nav>
+        <div class="header__log">
+            <a class="header__log__item header__log__item--login" href="#">Login</a>
+            <span>/</span>
+            <a class="header__log__item header__log__item--register" href="#">Register</a>
+        </div>
+    </header>
+    <aside class="theme-switch">
+        <input type="checkbox" id="checkbox" class="theme-switch__checkbox" />
+        <label for="checkbox" class="theme-switch__label">
+            <img class="theme-switch__label__icon theme-switch__label__icon--moon" src="assets/svgs/moon.svg" alt="Moon" />
+            <img class="theme-switch__label__icon theme-switch__label__icon--sun" src="assets/svgs/sun.svg" alt="Moon" />
+            <div class="theme-switch__label__ball"></div>
+        </label>
+    </aside>
+    <main class="main-info">
+        <div class="main-info__item main-info__item--one">
+            <img class="main-info__item__img" src="./assets/svgs/csgo.svg" alt="CS:GO" />
+            <p class="main-info__item__desc">Pozrite sa na zoznam našich serverov & Pripojte sa!*(niečo v tom zmysle)*</p>
+            <a class="main-info__item__link" href="#">Viac info</a>
+        </div>
+        <div class="main-info__item main-info__item--two">
+            <img class="main-info__item__img" src="./assets/svgs/templar.svg" alt="Templar" />
+            <p class="main-info__item__desc">Pozrite sa na náš tím!</p>
+            <a class="main-info__item__link" href="#">Viac info</a>
+        </div>
+        <div class="main-info__item main-info__item--three">
+            <img class="main-info__item__img" src="./assets/svgs/shopping-cart.svg" alt="Shopping cart" />
+            <p class="main-info__item__desc">Nakúpte si VIP výhody alebo rovno svoju vlastnú postavičku (niečo také)</p>
+            <a class="main-info__item__link" href="#">Viac info</a>
+        </div>
+        <div class="main-info__item main-info__item--four">
+            <img class="main-info__item__img" src="./assets/svgs/forum.svg" alt="Forum" />
+            <p class="main-info__item__desc">Fórum</p>
+            <a class="main-info__item__link" href="#">Viac info</a>
+        </div>
+        <div class="main-info__item main-info__item--five">
+            <img class="main-info__item__img" src="./assets/svgs/ban.svg" alt="Ban" />
+            <p class="main-info__item__desc">Banlist</p>
+            <a class="main-info__item__link" href="#">Viac info</a>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="footer__content">
+            <span class="footer__content__item footer__content__text footer__content__text--left">JOIN</span>
+            <a class="footer__content__item footer__content__link" href="#">
+                <img  class="footer__content__link__discord" src="./assets/svgs/discord.svg" alt="Discord">
+            </a>
+            <span class="footer__content__item footer__content__text  footer__content__text--right">US!</span>
+        </div>
+    </footer>
+</body>
+</html>

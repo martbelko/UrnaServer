@@ -1,25 +1,48 @@
 .footer {
+  width: 100%;
+  height: var(--footer-height);
+  display: flex;
+  justify-content: center;
   position: absolute;
   bottom: 0;
-  right: 0;
+  box-sizing: border-box;
+}
 
-  color: white;
+.footer__content {
+  width: 20%;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 2rem;
+}
 
+.footer__content__item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer__content__text {
+  width: 30%;
+  font-size: 8vh;
+  font-weight: 600;
+  display: flex;
+}
+
+.footer__content__text--left {
+  justify-content: flex-end;
+}
+
+.footer__content__text--right {
+  justify-content: flex-start;
+}
+
+.footer__content__link {
+  width: 30%;
+  display: flex;
+  justify-items: center;
+  align-items: center;
+}
+
+.footer__content__link__discord {
   height: var(--footer-height);
-  width: 100%;
-
-  backdrop-filter: blur(4px);
-}
-
-.footer__item {
-  height: 8vh;
-  filter: blur(0);
-}
-
-.footer__item--facebook {
-  height: 10vh;
 }
