@@ -16,7 +16,8 @@ import loginRouter from './routers/login';
 import authRouter from './routers/auth';
 import emailRouter from './routers/verifyEmail';
 
-import { validateAuthHeader, validateDateHeader } from './utils/authValidator';
+import validateAuthHeader from './utils/authHeaderValidator';
+import validateDateHeader from './utils/dateHeaderValidator';
 
 dotenv.config();
 
@@ -26,10 +27,12 @@ const app = express();
 const port = Number(process.env.PORT as string);
 
 const rateLimiter = new Map<string, number>();
+const clearIntervalSeconds = 60;
+const maximumRequeststhreshold = 60;
 
 setInterval(() => {
     rateLimiter.clear();
-}, 5000);
+}, clearIntervalSeconds * 1000);
 
 app.use(express.json());
 app.use(cors());
@@ -42,10 +45,10 @@ app.use((req, res, next) => {
     const number = rateLimiter.get(ip);
     if (number == undefined) {
         rateLimiter.set(ip, 1);
-    } else if (number < 1) {
+    } else if (number < maximumRequeststhreshold) {
         rateLimiter.set(ip, number + 1);
     } else {
-        return res.send({ error: 'Maximum requests exceeded' });
+        return res.send({ error: `Maximum request threshold ${maximumRequeststhreshold}requests/${clearIntervalSeconds}s exceeded` });
     }
 
     next();

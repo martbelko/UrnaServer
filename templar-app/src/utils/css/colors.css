@@ -1,0 +1,8 @@
+:root {
+  --primary-font-color: black;
+
+  --header-bg-color: white;
+  --header-shadow-color: black;
+  --header-border-color: red;
+  --header-link-bg-active-color: green;
+}

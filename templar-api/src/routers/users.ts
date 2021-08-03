@@ -6,32 +6,31 @@ import { generateSalt, hashPassword, hashSalt } from './../database';
 import { validateUserEmail, validateUserName } from './../validators/userValidator';
 import { validatePassword } from './../validators/passwordValidator';
 import BaseError, { ErrorType, generateErrorFromPrismaException } from './../error';
-import { validateAuthHeader } from '../utils/authValidator';
+import { validateAuthHeader } from '../utils/authHeaderValidator';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
 
-interface UserGet {
-    id: number;
-    name: string;
-    email: string;
-}
-
-router.get('/api/users', async (req, res, next) => {
-    const authUser = validateAuthHeader(req.headers.authorization);
+router.get('/api/users', async (req, res) => {
+    const authUser = await validateAuthHeader(req.headers.authorization);
     if (typeof authUser == 'number') {
         return res.sendStatus(authUser);
+    }
+
+    const admin = await prisma.admin.findFirst({
+        where: {
+            userID: authUser.id
+        }
+    });
+
+    if (admin == null) {
+        return res.sendStatus(403);
     }
 
     const id = Number(req.query.id as string);
     const name = req.query.name as string;
     const email = req.query.email as string;
-    req.params = { id: isNaN(id) ? undefined : id, name: name, email: email } as UserGet;
 
-    next();
-},
-async (req, res) => {
-    const user = req.params as UserGet;
     const users = await prisma.user.findMany({
         select: {
             id: true,
@@ -41,10 +40,11 @@ async (req, res) => {
             updatedAt: true
         },
         where: {
-            id: user.id,
-            name: user.name,
+            id: isNaN(id) ? undefined : id,
+            name: name,
             email: {
-                email: user.email
+                email: email,
+                verified: true
             }
         }
     });
@@ -108,7 +108,6 @@ async (req, res) => {
     try {
         const insertedUser = await prisma.user.create({
             select: {
-                id: true,
                 name: true,
                 email: {
                     select: {
