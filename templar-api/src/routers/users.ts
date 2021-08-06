@@ -33,11 +33,12 @@ router.get('/api/users', async (req, res) => {
 
     const users = await prisma.user.findMany({
         select: {
-            id: true,
+            id: false,
             name: true,
-            email: true,
-            createdAt: true,
-            updatedAt: true
+            email: false,
+            Vip: false,
+            createdAt: false,
+            updatedAt: false
         },
         where: {
             id: isNaN(id) ? undefined : id,

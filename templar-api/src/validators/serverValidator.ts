@@ -1,6 +1,5 @@
 import BaseError, { ErrorType } from '../error';
-
-const ipRegex = new RegExp(/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/);
+import { ipRegex } from '../share';
 
 export function validateIP(ip: string, paramName: string): BaseError | null {
     const errorTitle = `Invalid ${paramName} parameter`;

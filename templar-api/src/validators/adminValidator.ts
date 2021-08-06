@@ -1,9 +1,5 @@
 import BaseError, { ErrorType } from '../error';
-
-const steamidRegex = new RegExp(/^STEAM_[0-5]:[01]:\d+$/);
-
-const minImmunity = 0;
-const maxImmunity = 100;
+import { maxImmunity, minImmunity, steamidRegex } from '../share';
 
 export function validateSteamID(steamid: string, paramName: string): BaseError | null {
     const errorTitle = `Invalid ${paramName} parameter`;

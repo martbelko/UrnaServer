@@ -1,9 +1,6 @@
 import BaseError, { ErrorType, NullError } from '../error';
 
-const minPasswordLen = 8;
-const maxPasswordLen = 100;
-
-const allowedPasswordChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/*\\-=,.[]|';
+import { minPasswordLen, maxPasswordLen, allowedPasswordChars } from '../share';
 
 function containsCapital(str: string): boolean {
     const capitals = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

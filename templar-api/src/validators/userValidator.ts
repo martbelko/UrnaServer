@@ -1,12 +1,5 @@
 import BaseError, { ErrorType, NullError } from '../error';
-
-const minUserNameLen = 6;
-const maxUserNameLen = 100;
-
-const allowedNameChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-
-// eslint-disable-next-line no-useless-escape
-const emailRegex = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+import { allowedUsernameChars, emailRegex, maxUserNameLen, minUserNameLen } from '../share';
 
 export function validateUserName(name: string, paramName: string): BaseError | null {
     if (name == undefined || name == null) {
@@ -36,7 +29,7 @@ export function validateUserName(name: string, paramName: string): BaseError | n
     }
 
     for (const ch of name) {
-        if (!allowedNameChars.includes(ch)) {
+        if (!allowedUsernameChars.includes(ch)) {
             const error: BaseError = {
                 type: ErrorType.InvalidUsername,
                 title: errorTitle,

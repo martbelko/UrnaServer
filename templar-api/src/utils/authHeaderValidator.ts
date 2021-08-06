@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
-import { AuthPayload } from '../auth/auth';
+import { AccessTokenPayload } from '../auth/auth';
 
 const prisma = new PrismaClient();
 
@@ -13,7 +13,7 @@ export enum AuthHeaderError {
     InvalidHeader = 1
 }
 
-export async function validateAuthHeader(authHeader: string | undefined): Promise<number | AuthPayload> {
+export async function validateAuthHeader(authHeader: string | undefined): Promise<number | AccessTokenPayload> {
     const header = authHeader?.split(' ');
     if (header == undefined) {
         return 401;
@@ -27,19 +27,23 @@ export async function validateAuthHeader(authHeader: string | undefined): Promis
     try {
         const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string);
         if (typeof payload == 'string') {
-            console.log('error');
             return 401;
         }
 
-        const payloadUser = payload as unknown as AuthPayload;
-        if (payloadUser.id == undefined || payloadUser.createdAt == undefined) {
+        const payloadUser = payload as unknown as AccessTokenPayload;
+        if (payloadUser.userid == undefined || payloadUser.createdAt == undefined || payloadUser.refreshTokenId == undefined) {
             return 401;
         }
 
         const userInDatabase = await prisma.user.findFirst({
             where: {
-                id: payloadUser.id,
-                createdAt: payloadUser.createdAt
+                id: payloadUser.userid,
+                createdAt: payloadUser.createdAt,
+                refreshTokens: {
+                    some: {
+                        id: payloadUser.refreshTokenId
+                    }
+                }
             }
         });
 
@@ -47,12 +51,13 @@ export async function validateAuthHeader(authHeader: string | undefined): Promis
             return 401;
         }
 
-        const user: AuthPayload = {
-            id: payloadUser.id,
-            createdAt: payloadUser.createdAt
+        const accessTokenPayload: AccessTokenPayload = {
+            userid: payloadUser.userid,
+            createdAt: payloadUser.createdAt,
+            refreshTokenId: payloadUser.refreshTokenId
         };
 
-        return user;
+        return accessTokenPayload;
     } catch (e) {
         return 401;
     }
