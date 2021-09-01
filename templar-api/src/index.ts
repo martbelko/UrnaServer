@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
 import cors from 'cors';
-import https from 'https';
 import fs from 'fs';
 import dotenv from 'dotenv';
 
@@ -48,7 +47,7 @@ app.use((req, res, next) => {
     } else if (number < maximumRequeststhreshold) {
         rateLimiter.set(ip, number + 1);
     } else {
-        return res.send({ error: `Maximum request threshold ${maximumRequeststhreshold}requests/${clearIntervalSeconds}s exceeded` });
+        return res.status(500).send({ error: `Maximum request threshold ${maximumRequeststhreshold}requests/${clearIntervalSeconds}s exceeded` });
     }
 
     next();
@@ -69,8 +68,6 @@ const options = {
     key: fs.readFileSync('key.pem'),
     cert: fs.readFileSync('server.crt')
 };
-
-const server = https.createServer(options, app);
 
 app.get('/api/admins', adminRouter);
 app.post('/api/admins', adminRouter);
@@ -105,7 +102,7 @@ app.post('/api/verify-email', emailRouter);
 
 async function main() {
     await prisma.refreshToken.deleteMany();
-    server.listen(port, () => console.log(`Listening on port ${port}`));
+    app.listen(port, () => console.log(`Listening on port ${port}`));
 }
 
 main()

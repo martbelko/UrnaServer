@@ -7,50 +7,69 @@ import { validateUserEmail, validateUserName } from './../validators/userValidat
 import { validatePassword } from './../validators/passwordValidator';
 import BaseError, { ErrorType, generateErrorFromPrismaException } from './../error';
 import { validateAuthHeader } from '../utils/authHeaderValidator';
+import { validateCaptcha } from '../validators/captchaValidator';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
 
 router.get('/api/users', async (req, res) => {
     const authUser = await validateAuthHeader(req.headers.authorization);
-    if (typeof authUser == 'number') {
-        return res.sendStatus(authUser);
-    }
-
-    const admin = await prisma.admin.findFirst({
-        where: {
-            userID: authUser.id
+    async function isPrivilegedAdmin() {
+        if (typeof authUser == 'number') {
+            return false;
         }
-    });
 
-    if (admin == null) {
-        return res.sendStatus(403);
+        const admin = await prisma.admin.findFirst({
+            where: {
+                userID: authUser.userid
+            }
+        });
+
+        if (admin == null) {
+            return false;
+        }
+
+        // TODO: Check admin flags...
+
+        return true;
     }
 
-    const id = Number(req.query.id as string);
-    const name = req.query.name as string;
-    const email = req.query.email as string;
+    const isAdmin = await isPrivilegedAdmin();
+
+    const id = Number(req.query.id as string | undefined);
+    const name = req.query.name as string | undefined;
+    const email = req.query.email as string | undefined;
 
     const users = await prisma.user.findMany({
         select: {
-            id: false,
-            name: true,
-            email: false,
-            Vip: false,
-            createdAt: false,
+            id: isAdmin,
+            name: isAdmin || (name != undefined),
+            email: isAdmin || (email != undefined),
+            Vip: isAdmin,
+            createdAt: isAdmin,
             updatedAt: false
         },
         where: {
-            id: isNaN(id) ? undefined : id,
+            id: isNaN(id) ? undefined : (isAdmin ? id : undefined),
             name: name,
             email: {
-                email: email,
-                verified: true
+                email: email
             }
         }
     });
 
-    res.send(JSON.stringify(users));
+    if (!isAdmin && users.length > 1) {
+        const error: BaseError = {
+            type: ErrorType.MultipleResults,
+            title: 'Multiple results',
+            status: 403,
+            detail: 'Multiple results found'
+        };
+
+        return res.status(error.status).send({ error: error });
+    }
+
+    return res.send(JSON.stringify(users));
 });
 
 interface UserPost {
@@ -60,14 +79,13 @@ interface UserPost {
     salt: string;
 }
 
-router.post('/api/users', (req, res, next) => {
-    if (req.body instanceof Array) {
-        return res.send({ error: 'Can insert only 1 user' });
-    }
+router.post('/api/users', async (req, res) => {
+    // TODO: Add spam protection
 
     const name = req.body.name as string;
     const email = req.body.email as string;
     const password = req.body.password as string;
+    const captcha = req.body.captcha as string;
 
     {
         const error = validateUserName(name, 'name');
@@ -90,6 +108,13 @@ router.post('/api/users', (req, res, next) => {
         }
     }
 
+    {
+        const error = await validateCaptcha(captcha, 'captcha');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
+        }
+    }
+
     const salt = generateSalt();
     const hashedPassword = new TextEncoder().encode(hashPassword(password, salt));
     const hashedSalt = hashSalt(salt);
@@ -101,11 +126,6 @@ router.post('/api/users', (req, res, next) => {
         salt: hashedSalt
     };
 
-    req.params = user;
-    next();
-},
-async (req, res) => {
-    const user = req.params as UserPost;
     try {
         const insertedUser = await prisma.user.create({
             select: {
@@ -133,10 +153,10 @@ async (req, res) => {
             }
         });
 
-        res.send({ user: insertedUser });
+        return res.send({ user: insertedUser });
     } catch (e) {
         const error = generateErrorFromPrismaException(e);
-        res.send({ error: error });
+        return res.status(error.status).send({ error: error });
     }
 });
 
@@ -148,20 +168,21 @@ interface UserPatch {
     salt: string | undefined;
 }
 
-router.patch('/api/users/:id', (req, res, next) => {
+router.patch('/api/users/:id', async (req, res) => {
     const id = Number(req.params.id);
     if (isNaN(id)) {
         const error: BaseError = {
             type: ErrorType.InvalidID,
             title: 'Invalid id parameter',
-            status: 401,
+            status: 400,
             detail: `id paramter must be a number, but was ${req.params.id}`
         };
+
         return res.status(error.status).send({ error: error });
     }
 
     const name = req.body.name as string;
-    if (name != undefined) {
+    {
         const error = validateUserName(name, 'name');
         if (error != null) {
             return res.status(error.status).send({ error: error });
@@ -169,7 +190,7 @@ router.patch('/api/users/:id', (req, res, next) => {
     }
 
     const email = req.body.email as string;
-    if (email != null) {
+    {
         const error = validateUserEmail(email, 'email');
         if (error != null) {
             return res.status(error.status).send({ error: error });
@@ -177,7 +198,7 @@ router.patch('/api/users/:id', (req, res, next) => {
     }
 
     const password = req.body.password as string;
-    if (password != undefined) {
+    {
         const error = validatePassword(password, 'password');
         if (error != null) {
             return res.status(error.status).send({ error: error });
@@ -185,35 +206,29 @@ router.patch('/api/users/:id', (req, res, next) => {
     }
 
     const password2 = req.body.password2 as string;
-    if (password != undefined) {
-        if (password2 == undefined) {
-            const error: BaseError = {
-                type: ErrorType.WasNull,
-                title: 'Missing password2 parameter',
-                status: 401,
-                detail: 'password parameter was specified, but password2 parameter was not'
-            };
-            return res.status(error.status).send({ error: error });
-        }
-
-        if (password != password2) {
-            const error: BaseError = {
-                type: ErrorType.PasswordsMismatch,
-                title: 'passwords did not match',
-                status: 401,
-                detail: 'password parameter and password2 parameter did not match'
-            };
-            return res.status(error.status).send({ error: error });
-        }
+    if (password2 == undefined) {
+        const error: BaseError = {
+            type: ErrorType.WasNull,
+            title: 'Missing password2 parameter',
+            status: 400,
+            detail: 'password parameter was specified, but password2 parameter was not'
+        };
+        return res.status(error.status).send({ error: error });
     }
 
-    let hashedPassword: Uint8Array | undefined = undefined;
-    let hashedSalt: string | undefined = undefined;
-    if (password != undefined) {
-        const salt = generateSalt();
-        hashedPassword = new TextEncoder().encode(hashPassword(password, salt));
-        hashedSalt = hashSalt(salt);
+    if (password != password2) {
+        const error: BaseError = {
+            type: ErrorType.PasswordsMismatch,
+            title: 'passwords did not match',
+            status: 400,
+            detail: 'password parameter and password2 parameter did not match'
+        };
+        return res.status(error.status).send({ error: error });
     }
+
+    const salt = generateSalt();
+    const hashedPassword = new TextEncoder().encode(hashPassword(password, salt));
+    const hashedSalt = hashSalt(salt);
 
     const user: UserPatch = {
         id: id,
@@ -222,12 +237,7 @@ router.patch('/api/users/:id', (req, res, next) => {
         password: hashedPassword && Array.from(hashedPassword),
         salt: hashedSalt
     };
-    req.body = user;
 
-    next();
-},
-async (req, res) => {
-    const user = req.body as UserPatch;
     const updatedUser = await prisma.user.update({
         where: {
             id: user.id

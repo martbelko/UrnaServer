@@ -36,7 +36,7 @@ function incrementTries(ip: string): void {
 
 function hasMaximumTries(ip: string): boolean {
     const currTries = tries.get(ip);
-    if (currTries == undefined || currTries < 3) {
+    if (currTries != undefined && currTries > 10) {
         return true;
     }
 
@@ -50,7 +50,7 @@ router.post('/auth/login', async (req, res) => {
     }
 
     if (hasMaximumTries(ip)) {
-        return res.send({ error: 'Maximum number of tries' });
+        return res.send({ error: 'Maximum number of tries exceeded' });
     }
 
     const username = req.body.username as string;
@@ -122,7 +122,7 @@ router.post('/auth/login', async (req, res) => {
 
     const refreshTokenDb = await prisma.refreshToken.create({
         data: {
-            userID: refreshTokenPayload.userid,
+            userID: user.id,
             token: refreshToken,
             expiresIn: 7 * 24 * 60 * 60 // 1 week
         }
@@ -133,9 +133,9 @@ router.post('/auth/login', async (req, res) => {
         createdAt: user.createdAt,
         refreshTokenId: refreshTokenDb.id
     };
-    const accessToken = generateAccessToken(accessTokenPayload);
 
-    res.send({ accessToken: accessToken, refreshToken: refreshToken });
+    const accessToken = generateAccessToken(accessTokenPayload);
+    res.send({ userid: user.id, accessToken: accessToken, refreshToken: refreshToken });
 });
 
 router.delete('/auth/logout', async (req, res) => {
@@ -147,7 +147,7 @@ router.delete('/auth/logout', async (req, res) => {
     const refreshToken = req.body.refreshToken as string | undefined;
     if (refreshToken == undefined) {
         const error = new NullError('refreshToken');
-        return res.sendStatus(error.status).send(error);
+        return res.status(error.status).send({ error: error });
     }
 
     const count = await prisma.refreshToken.deleteMany({

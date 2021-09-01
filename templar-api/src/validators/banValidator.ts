@@ -9,7 +9,7 @@ export function validateBanType(type: BanType | undefined, paramName: string): B
     return null;
 }
 
-export function validateBanLength(lengthStr: string, paramName: string): BaseError | null {
+export function validateBanLength(lengthStr: string | undefined, paramName: string): BaseError | null {
     const errorTitle = `Invalid ${paramName} parameter`;
     const errorStatus = 500;
 
@@ -41,7 +41,7 @@ export function validateBanLength(lengthStr: string, paramName: string): BaseErr
     return null;
 }
 
-export function validateBanReason(reason: string, paramName: string): BaseError | null {
+export function validateBanReason(reason: string | undefined, paramName: string): BaseError | null {
     if (reason == undefined) {
         return new NullError(paramName);
     }

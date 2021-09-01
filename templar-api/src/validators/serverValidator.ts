@@ -1,7 +1,7 @@
 import BaseError, { ErrorType } from '../error';
 import { ipRegex } from '../share';
 
-export function validateIP(ip: string, paramName: string): BaseError | null {
+export function validateIP(ip: string | undefined, paramName: string): BaseError | null {
     const errorTitle = `Invalid ${paramName} parameter`;
     const errorStatus = 500;
 

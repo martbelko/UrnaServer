@@ -1,8 +1,6 @@
 export const minPasswordLen = 8;
 export const maxPasswordLen = 100;
 
-export const allowedPasswordChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/*\\-=,.[]|';
-
 export const steamidRegex = new RegExp(/^STEAM_[0-5]:[01]:\d+$/);
 
 export const minImmunity = 0;

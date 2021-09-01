@@ -1,8 +1,8 @@
 import BaseError, { ErrorType, NullError } from '../error';
 import { allowedUsernameChars, emailRegex, maxUserNameLen, minUserNameLen } from '../share';
 
-export function validateUserName(name: string, paramName: string): BaseError | null {
-    if (name == undefined || name == null) {
+export function validateUserName(name: string | undefined, paramName: string): BaseError | null {
+    if (name == undefined) {
         return new NullError(paramName);
     }
 
@@ -43,8 +43,8 @@ export function validateUserName(name: string, paramName: string): BaseError | n
     return null;
 }
 
-export function validateUserEmail(email: string, paramName: string): BaseError | null {
-    if (email == undefined || email == null) {
+export function validateUserEmail(email: string | undefined, paramName: string): BaseError | null {
+    if (email == undefined) {
         return new NullError(paramName);
     }
 

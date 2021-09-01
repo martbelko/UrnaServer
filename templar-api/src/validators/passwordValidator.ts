@@ -1,6 +1,6 @@
 import BaseError, { ErrorType, NullError } from '../error';
 
-import { minPasswordLen, maxPasswordLen, allowedPasswordChars } from '../share';
+import { minPasswordLen, maxPasswordLen } from '../share';
 
 function containsCapital(str: string): boolean {
     const capitals = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -32,8 +32,8 @@ function containsLower(str: string): boolean {
     return false;
 }
 
-export function validatePassword(password: string, paramName: string): BaseError | null {
-    if (password == undefined || password == null) {
+export function validatePassword(password: string | undefined, paramName: string): BaseError | null {
+    if (password == undefined) {
         return new NullError(paramName);
     }
 
@@ -65,7 +65,7 @@ export function validatePassword(password: string, paramName: string): BaseError
             type: ErrorType.InvalidPassword,
             title: errorTitle,
             status: errorStatus,
-            detail: 'Password does not contain capital letter'
+            detail: 'Password does not contain capital letter, lower letter or number'
         };
         return error;
     }
@@ -75,7 +75,7 @@ export function validatePassword(password: string, paramName: string): BaseError
             type: ErrorType.InvalidPassword,
             title: errorTitle,
             status: errorStatus,
-            detail: 'Password does not contain number'
+            detail: 'Password does not contain capital letter, lower letter or number'
         };
         return error;
     }
@@ -85,21 +85,9 @@ export function validatePassword(password: string, paramName: string): BaseError
             type: ErrorType.InvalidPassword,
             title: errorTitle,
             status: errorStatus,
-            detail: 'Password does not contain lower letter'
+            detail: 'Password does not contain capital letter, lower letter or number'
         };
         return error;
-    }
-
-    for (const ch of password) {
-        if (!allowedPasswordChars.includes(ch)) {
-            const error: BaseError = {
-                type: ErrorType.InvalidPassword,
-                title: errorTitle,
-                status: errorStatus,
-                detail: 'Password contain invalid character'
-            };
-            return error;
-        }
     }
 
     return null;

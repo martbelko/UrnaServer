@@ -4,7 +4,7 @@ import { MaximumTimeOffsetSeconds } from '../globals';
 import { NextFunction, Request, Response } from 'express';
 
 export function validateDateHeader(req: Request, res: Response, next: NextFunction): void | Response<unknown, Record<string, unknown>> {
-    const headerDate = new Date(req.headers.date as string);
+    const headerDate = new Date(req.headers['last-modified'] as string);
     if (headerDate.toString() == 'Invalid Date') {
         const error: BaseError = {
             type: ErrorType.InvalidTimestamp,

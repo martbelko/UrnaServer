@@ -1,25 +1,29 @@
 import BaseError, { ErrorType } from '../error';
 import { maxImmunity, minImmunity, steamidRegex } from '../share';
 
-export function validateSteamID(steamid: string, paramName: string): BaseError | null {
+export function validateSteamID(steamid: string | undefined, paramName: string): BaseError | null {
     const errorTitle = `Invalid ${paramName} parameter`;
     const errorStatus = 500;
 
-    if (steamid == undefined || steamid == null)
-        return {
+    if (steamid == undefined) {
+        const error: BaseError = {
             type: ErrorType.WasNull,
             title: errorTitle,
             status: errorStatus,
             detail: `Missing ${paramName} parameter`
         };
+        return error;
+    }
 
-    if (!steamidRegex.test(steamid))
-        return {
-            type: ErrorType.InvalidSteamid,
+    if (!steamidRegex.test(steamid)) {
+        const error: BaseError = {
+            type: ErrorType.WasNull,
             title: errorTitle,
             status: errorStatus,
-            detail: `${paramName} parameter is an invalid steamID`
+            detail: `Missing ${paramName} parameter`
         };
+        return error;
+    }
 
     return null;
 }
@@ -28,7 +32,7 @@ export function validateFlags(flags: number, paramName: string): BaseError | nul
     const errorTitle = `Invalid ${paramName} parameter`;
     const errorStatus = 500;
 
-    if (flags == null || flags == undefined) {
+    if (flags == undefined) {
         const error: BaseError = {
             type: ErrorType.WasNull,
             title: errorTitle,

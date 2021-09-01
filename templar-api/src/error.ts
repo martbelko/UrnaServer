@@ -19,6 +19,7 @@ export class NullError implements BaseError {
     }
 }
 
+
 export enum ErrorType {
     WasNull = '/errors/null',
     InvalidID = '/errors/invalid-id',
@@ -41,7 +42,9 @@ export enum ErrorType {
     PrismaClientUnknownRequestError = '/errors/prisma-client-unknown-request',
     UnknownExceptionError = '/errors/unknown-exception',
     InvalidTimestamp = '/errors/invalid-timestamp',
-    ExpiredTimestamp = '/errors/expired-timestamp'
+    ExpiredTimestamp = '/errors/expired-timestamp',
+    InvalidCaptcha = '/errors/invalid-captcha',
+    MultipleResults = '/errors/multiple-results'
 }
 
 export function generateErrorFromPrismaException(e: unknown): BaseError {

@@ -1,9 +1,11 @@
+import { PrismaClient } from '@prisma/client';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 
-import { AuthPayload, generateAccessToken } from '../auth/auth';
+import { AccessTokenPayload, RefreshTokenPayload, generateAccessToken } from '../auth/auth';
 import { NullError } from '../error';
 
+const prisma = new PrismaClient();
 export const router = express.Router();
 
 router.post('/auth/token', async (req, res) => {
@@ -13,22 +15,35 @@ router.post('/auth/token', async (req, res) => {
         return res.status(error.status).send({ error: error });
     }
 
-    // TODO: Add database check for refresh token
+    const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string);
+    if (typeof payload == 'string') {
+        return 401;
+    }
 
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string, (error, payload) => {
-        if (error != null) {
-            return res.sendStatus(403);
+    const refreshTokenPayload = payload as unknown as RefreshTokenPayload;
+    if (refreshTokenPayload.userid == undefined || refreshTokenPayload.createdAt == undefined) {
+        return 401;
+    }
+
+    const refreshTokenDb = await prisma.refreshToken.findFirst({
+        where: {
+            userID: refreshTokenPayload.userid,
+            createdAt: refreshTokenPayload.createdAt
         }
-
-        const payloadToken = payload as unknown as AuthPayload;
-        const user: AuthPayload = {
-            id: payloadToken.id,
-            createdAt: payloadToken.createdAt
-        };
-
-        const accessToken = generateAccessToken(user);
-        return res.send({ accessToken: accessToken });
     });
+
+    if (refreshTokenDb == null) {
+        return res.sendStatus(401);
+    }
+
+    const accessTokenPayload: AccessTokenPayload = {
+        userid: refreshTokenPayload.userid,
+        createdAt: refreshTokenPayload.createdAt,
+        refreshTokenId: refreshTokenDb.id
+    };
+
+    const accessToken = generateAccessToken(accessTokenPayload);
+    return res.send({ accessToken: accessToken });
 });
 
 export default router;
