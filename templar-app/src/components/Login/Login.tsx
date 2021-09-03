@@ -2,8 +2,7 @@ import React from 'react';
 import { useFormik } from 'formik';
 
 import { makeRequest, RequestMethod } from '../../utils/request';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { accessTokenAtom, refreshTokenAtom, useridAtom } from '../../store/atoms';
+import { LoginInfo } from '../../utils/loginInfo';
 
 function Login(): JSX.Element {
     const formikParameters = useFormik({
@@ -19,22 +18,14 @@ function Login(): JSX.Element {
                 .then(async response => {
                     const json = await response.json();
                     if (json.error != undefined) {
-                        formikParameters.errors.username = json.error.detail;
+                        return formikParameters.errors.username = json.error;
                     }
 
-                    const setUserid = useSetRecoilState(useridAtom);
-                    const setAccessToken = useSetRecoilState(accessTokenAtom);
-                    const setRefreshToken = useSetRecoilState(refreshTokenAtom);
+                    LoginInfo.sUserid = json.userid as number;
+                    LoginInfo.sAccessToken = json.accessToken as string;
+                    LoginInfo.sRefreshToken = json.refreshToken as string;
 
-                    setUserid(json.userid as number);
-                    setAccessToken(json.accessToken as string);
-                    setRefreshToken(json.refreshToken as string);
-
-                    const userid = useRecoilValue(useridAtom);
-                    const accessToken = useRecoilValue(accessTokenAtom);
-                    const refreshToken = useRecoilValue(refreshTokenAtom);
-
-                    console.log(`Userid: ${userid}, accessToken: ${accessToken}, refreshToken: ${refreshToken}`);
+                    console.log(`Userid: ${LoginInfo.sUserid}, accessToken: ${LoginInfo.sAccessToken}, refreshToken: ${LoginInfo.sRefreshToken}`);
                 },
                 response => console.log(`Error: ${response}`));
         }
