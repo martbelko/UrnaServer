@@ -2,12 +2,10 @@ import React, { useEffect } from 'react';
 import { useFormik } from 'formik';
 
 import { makeRequest, RequestMethod } from '../../utils/request';
-import { LoginInfo } from '../../utils/loginInfo';
+import { useHistory } from 'react-router';
 
 function Login(): JSX.Element {
-    useEffect(() => {
-        console.log(localStorage.getItem('accessToken'));
-    }, []);
+    const history = useHistory();
 
     const formikParameters = useFormik({
         initialValues: {
@@ -25,19 +23,21 @@ function Login(): JSX.Element {
                         return formikParameters.errors.username = json.error;
                     }
 
-                    LoginInfo.sUserid = json.userid as number;
-                    LoginInfo.sAccessToken = json.accessToken as string;
-                    LoginInfo.sRefreshToken = json.refreshToken as string;
-
                     localStorage.setItem('userid', (json.userid as number).toString());
                     localStorage.setItem('accessToken', json.accessToken as string);
                     localStorage.setItem('refreshToken', json.refreshToken as string);
 
                     alert('Logged successfully');
+
+                    history.push('/update');
                 },
                 response => console.log(`Error: ${response}`));
         }
     });
+
+    useEffect(() => {
+        console.log(localStorage.getItem('accessToken'));
+    }, []);
 
     return (
         <div>

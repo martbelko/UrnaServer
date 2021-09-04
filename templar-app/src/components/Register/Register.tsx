@@ -60,8 +60,8 @@ async function isUnique(responseObject: Response): Promise<boolean> {
 }
 
 const validationSchema = Yup.object().shape({
-    username: Yup.string().
-        required('Required')
+    username: Yup.string()
+        .required('Required')
         .min(minUserNameLen, `username must be at least ${minUserNameLen} characters`)
         .max(maxUserNameLen, `username must be at most ${maxUserNameLen} characters`)
         .test('unique', 'username already in use', async val => {

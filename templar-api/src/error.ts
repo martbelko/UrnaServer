@@ -10,7 +10,7 @@ export interface BaseError {
 export class NullError implements BaseError {
     type = ErrorType.WasNull;
     title = '';
-    status = 500;
+    status = 400;
     detail = '';
 
     constructor(paramName: string) {
@@ -18,7 +18,6 @@ export class NullError implements BaseError {
         this.detail = `Missing ${paramName} parameter`;
     }
 }
-
 
 export enum ErrorType {
     WasNull = '/errors/null',

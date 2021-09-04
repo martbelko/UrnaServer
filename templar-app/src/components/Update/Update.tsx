@@ -59,8 +59,7 @@ async function isUnique(responseObject: Response): Promise<boolean> {
 }
 
 const validationSchema = Yup.object().shape({
-    username: Yup.string().
-        required('Required')
+    username: Yup.string()
         .min(minUserNameLen, `username must be at least ${minUserNameLen} characters`)
         .max(maxUserNameLen, `username must be at most ${maxUserNameLen} characters`)
         .test('unique', 'username already in use', async val => {
@@ -68,14 +67,12 @@ const validationSchema = Yup.object().shape({
             return await isUnique(user);
         }),
     email: Yup.string()
-        .required('Required')
         .email('Not valid email')
         .test('unique', 'email already in use', async val => {
             const user = await makeRequest(`api/users?email=${val}`, RequestMethod.GET, undefined);
             return await isUnique(user);
         }),
     password: Yup.string()
-        .required('Required')
         .min(minPasswordLen, `password must be at least ${minPasswordLen} characters`)
         .max(maxPasswordLen, `password must be at most ${maxPasswordLen} characters`)
         .test('lower', 'Password does not contain capital letter, lower letter or number', val => {
@@ -86,7 +83,6 @@ const validationSchema = Yup.object().shape({
             return false;
         }),
     passwordVerify: Yup.string()
-        .required('Required')
         .oneOf([Yup.ref('password')], 'Passwords must match'),
     discordName: Yup.string()
 });
@@ -172,7 +168,7 @@ function Update(): JSX.Element {
     }
 
     if (user.name == '') {
-        return <div>User was null</div>;
+        return <div></div>;
     } else {
         formikParameters.initialValues.username = user.name;
         formikParameters.initialValues.email = user.email;

@@ -9,7 +9,6 @@ import BaseError, { ErrorType, generateErrorFromPrismaException } from './../err
 import { validateAuthHeader } from '../utils/authHeaderValidator';
 import { validateCaptcha } from '../validators/captchaValidator';
 import { AccessTokenPayload } from '../auth/auth';
-import { isAdmin } from '../utils/admin';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
@@ -55,9 +54,9 @@ router.get('/api/users', async (req, res) => {
         select: {
             id: isAdmin || isAuthUser || !isNaN(id),
             name: isAdmin || isAuthUser || (name != undefined),
-            email: {
+            email: !isAdmin && !isAuthUser && email == undefined ? false : {
                 select: {
-                    email: isAdmin || isAuthUser || (email != undefined),
+                    email: true,
                     verified: isAdmin
                 }
             },

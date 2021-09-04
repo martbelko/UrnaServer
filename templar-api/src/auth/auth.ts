@@ -13,7 +13,7 @@ export interface RefreshTokenPayload {
 
 export function generateAccessToken(obj: AccessTokenPayload): string {
     return jwt.sign(obj, process.env.ACCESS_TOKEN_SECRET as string, {
-        expiresIn: '1w'
+        expiresIn: '1m'
     });
 }
 

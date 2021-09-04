@@ -99,11 +99,6 @@ router.post('/auth/login', async (req, res) => {
         if (typeof payload == 'string') {
             indices.push(token.id);
         }
-
-        const payloadUser = payload as unknown as AccessTokenPayload;
-        if (payloadUser.userid == undefined || payloadUser.createdAt == undefined || payloadUser.refreshTokenId == undefined) {
-            indices.push(token.id);
-        }
     }
 
     for (const refTokenId of indices) {
@@ -136,6 +131,57 @@ router.post('/auth/login', async (req, res) => {
 
     const accessToken = generateAccessToken(accessTokenPayload);
     res.send({ userid: user.id, accessToken: accessToken, refreshToken: refreshToken });
+});
+
+router.post('/auth/token', async (req, res) => {
+    const refreshToken = req.body.refreshToken as string;
+    if (refreshToken == undefined) {
+        const error = new NullError('refreshToken');
+        res.status(error.status).send({ error: error });
+    }
+
+    const user = await prisma.user.findFirst({
+        where: {
+            refreshTokens: {
+                some: {
+                    token: refreshToken
+                }
+            }
+        }
+    });
+
+    if (user == null) {
+        return res.send({ error: 'No user found' });
+    }
+
+    const refreshTokenPayload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string);
+    if (typeof refreshTokenPayload == 'string') {
+        return res.send({ error: refreshTokenPayload });
+    }
+
+    const payloadUser = refreshTokenPayload as unknown as RefreshTokenPayload;
+    if (payloadUser.userid != user.id) {
+        return res.send({ error: 'IDs don\'t match' });
+    }
+
+    const refreshTokenDb = await prisma.refreshToken.findFirst({
+        where: {
+            token: refreshToken
+        }
+    });
+
+    if (refreshTokenDb == null) {
+        return res.send({ error: 'No refresh token found' });
+    }
+
+    const accessTokenPayload: AccessTokenPayload = {
+        userid: user.id,
+        refreshTokenId: refreshTokenDb.id,
+        createdAt: user.createdAt
+    };
+
+    const accessToken = generateAccessToken(accessTokenPayload);
+    return res.send({ token: accessToken });
 });
 
 router.delete('/auth/logout', async (req, res) => {
