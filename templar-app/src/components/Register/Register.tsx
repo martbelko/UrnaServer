@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 import * as Yup from 'yup';
@@ -6,6 +6,7 @@ import { useFormik } from 'formik';
 
 import { minUserNameLen, maxUserNameLen, minPasswordLen, maxPasswordLen } from './../../../../templar-api/src/share';
 import { makeRequest, RequestMethod } from '../../utils/request';
+import { useHistory } from 'react-router-dom';
 
 function containsCapital(str: string): boolean {
     const capitals = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -91,9 +92,10 @@ const validationSchema = Yup.object().shape({
     discordName: Yup.string()
 });
 
-let captcha = '';
-
 function Register(): JSX.Element {
+    const [captcha, setCaptcha] = useState('');
+    const history = useHistory();
+
     const formikParameters = useFormik({
         initialValues: {
             username: '',
@@ -109,6 +111,7 @@ function Register(): JSX.Element {
                 email: values.email,
                 password: values.password,
                 captcha: captcha
+                // TODO: Add discord name
             }))
                 .then(async response => {
                     const json = await response.json();
@@ -128,7 +131,8 @@ function Register(): JSX.Element {
                             formikParameters.errors.username = json.error.detail; // TODO: General error
                         }
                     } else {
-                        alert('Everything good');
+                        alert('Success!');
+                        history.push('/login');
                     }
                 },
                 reason => console.log(`Error: ${reason}`));
@@ -205,16 +209,13 @@ function Register(): JSX.Element {
                 </div>
                 <ReCAPTCHA
                     sitekey='6Ld-NDUcAAAAAGKyQbqz7AhOM4m1gixE6k9O1-7h'
-                    onChange={onChange}
+                    onChange={value => setCaptcha(value == null ? '' : value)}
                 />
+                {captcha == '' && <span>Captcha needs to be filled!</span>}
                 <button type="submit">Register</button>
             </form>
         </div>
     );
-}
-
-function onChange(value: string | null) {
-    captcha = value == null ? '' : value;
 }
 
 export default Register;

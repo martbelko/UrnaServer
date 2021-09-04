@@ -1,11 +1,11 @@
-import React from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
+import React, { useEffect, useRef, useState } from 'react';
 
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
 
 import { minUserNameLen, maxUserNameLen, minPasswordLen, maxPasswordLen } from './../../../../templar-api/src/share';
-import { makeRequest, RequestMethod } from '../../utils/request';
+import { makeAuthRequest, makeRequest, RequestMethod } from '../../utils/request';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 function containsCapital(str: string): boolean {
     const capitals = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -91,9 +91,7 @@ const validationSchema = Yup.object().shape({
     discordName: Yup.string()
 });
 
-let captcha = '';
-
-function Register(): JSX.Element {
+function Update(): JSX.Element {
     const formikParameters = useFormik({
         initialValues: {
             username: '',
@@ -104,11 +102,12 @@ function Register(): JSX.Element {
         },
         validationSchema: validationSchema,
         onSubmit: async (values) => {
-            await makeRequest('api/users/', RequestMethod.PATCH, JSON.stringify({
+            await makeRequest(`api/users/${userid}`, RequestMethod.PATCH, JSON.stringify({
                 name: values.username,
                 email: values.email,
                 password: values.password,
                 captcha: captcha
+                // TODO: Add discord name
             }))
                 .then(async response => {
                     const json = await response.json();
@@ -128,12 +127,56 @@ function Register(): JSX.Element {
                             formikParameters.errors.username = json.error.detail; // TODO: General error
                         }
                     } else {
-                        alert('Everything good');
+                        alert('Success!');
                     }
                 },
                 reason => console.log(`Error: ${reason}`));
         }
     });
+
+    const accessToken = localStorage.getItem('accessToken');
+    const useridStr = localStorage.getItem('userid');
+    const userid = Number(useridStr);
+
+    const [user, setUser] = useState({
+        name: '',
+        email: ''
+    });
+
+    const [captcha, setCaptcha] = useState('');
+
+    useEffect(() => {
+        async function queryUserData() {
+            const response = await makeAuthRequest(`api/users?id=${userid}`, accessToken as string,
+                RequestMethod.GET, undefined);
+            if (response.ok) {
+                const json = await response.json();
+                setUser({
+                    name: json[0].name,
+                    email: json[0].email.email
+                });
+            } else {
+                console.log(await response.json());
+                setUser({
+                    name: '',
+                    email: ''
+                });
+            }
+        }
+
+        queryUserData();
+    }, []);
+
+    if (accessToken == null || useridStr == null) {
+        return <div>Not logged</div>;
+    }
+
+    if (user.name == '') {
+        return <div>User was null</div>;
+    } else {
+        formikParameters.initialValues.username = user.name;
+        formikParameters.initialValues.email = user.email;
+    }
 
     return (
         <div>
@@ -205,16 +248,13 @@ function Register(): JSX.Element {
                 </div>
                 <ReCAPTCHA
                     sitekey='6Ld-NDUcAAAAAGKyQbqz7AhOM4m1gixE6k9O1-7h'
-                    onChange={onChange}
+                    onChange={value => setCaptcha(value == null ? '' : value)}
                 />
-                <button type="submit">Register</button>
+                {captcha == '' && <span>Captcha needs to be filled!</span>}
+                <button type="submit">Update</button>
             </form>
         </div>
     );
 }
 
-function onChange(value: string | null) {
-    captcha = value == null ? '' : value;
-}
-
-export default Register;
+export default Update;

@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFormik } from 'formik';
 
 import { makeRequest, RequestMethod } from '../../utils/request';
 import { LoginInfo } from '../../utils/loginInfo';
 
 function Login(): JSX.Element {
+    useEffect(() => {
+        console.log(localStorage.getItem('accessToken'));
+    }, []);
+
     const formikParameters = useFormik({
         initialValues: {
             username: '',
@@ -25,7 +29,11 @@ function Login(): JSX.Element {
                     LoginInfo.sAccessToken = json.accessToken as string;
                     LoginInfo.sRefreshToken = json.refreshToken as string;
 
-                    console.log(`Userid: ${LoginInfo.sUserid}, accessToken: ${LoginInfo.sAccessToken}, refreshToken: ${LoginInfo.sRefreshToken}`);
+                    localStorage.setItem('userid', (json.userid as number).toString());
+                    localStorage.setItem('accessToken', json.accessToken as string);
+                    localStorage.setItem('refreshToken', json.refreshToken as string);
+
+                    alert('Logged successfully');
                 },
                 response => console.log(`Error: ${response}`));
         }

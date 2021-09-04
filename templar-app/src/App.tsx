@@ -1,9 +1,10 @@
 import React from 'react';
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
+import { RecoilRoot } from 'recoil';
 
 import Register from './components/Register/Register';
 import Login from './components/Login/Login';
-import { RecoilRoot } from 'recoil';
+import Update from './components/Update/Update';
 
 function App(): JSX.Element {
     return (
@@ -18,6 +19,9 @@ function App(): JSX.Element {
                     </Route>
                     <Route path="/login">
                         <Login />
+                    </Route>
+                    <Route path="/update">
+                        <Update />
                     </Route>
                     <Route path="/">
                         <Redirect to="/index" />

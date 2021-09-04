@@ -8,13 +8,15 @@ import { validatePassword } from './../validators/passwordValidator';
 import BaseError, { ErrorType, generateErrorFromPrismaException } from './../error';
 import { validateAuthHeader } from '../utils/authHeaderValidator';
 import { validateCaptcha } from '../validators/captchaValidator';
+import { AccessTokenPayload } from '../auth/auth';
+import { isAdmin } from '../utils/admin';
 
 const prisma = new PrismaClient();
 export const router = express.Router();
 
 router.get('/api/users', async (req, res) => {
     const authUser = await validateAuthHeader(req.headers.authorization);
-    async function isPrivilegedAdmin() {
+    async function isPrivilegedAdmin(): Promise<boolean> {
         if (typeof authUser == 'number') {
             return false;
         }
@@ -35,28 +37,46 @@ router.get('/api/users', async (req, res) => {
     }
 
     const isAdmin = await isPrivilegedAdmin();
+    const isAuthUser =  !isAdmin && typeof authUser != 'number';
 
     const id = Number(req.query.id as string | undefined);
     const name = req.query.name as string | undefined;
     const email = req.query.email as string | undefined;
 
+    if (!isAdmin && !isAuthUser && isNaN(id) && name == undefined && email == undefined) {
+        return res.status(403).send({ error: 'Multiple results found' });
+    }
+
+    if (!isAdmin && !isAuthUser && !isNaN(id)) {
+        return res.status(403).send({ error: 'id parameter cannot be specified' }); // TODO: Send BaseError
+    }
+
     const users = await prisma.user.findMany({
         select: {
-            id: isAdmin,
-            name: isAdmin || (name != undefined),
-            email: isAdmin || (email != undefined),
+            id: isAdmin || isAuthUser || !isNaN(id),
+            name: isAdmin || isAuthUser || (name != undefined),
+            email: {
+                select: {
+                    email: isAdmin || isAuthUser || (email != undefined),
+                    verified: isAdmin
+                }
+            },
             Vip: isAdmin,
             createdAt: isAdmin,
             updatedAt: false
         },
         where: {
-            id: isNaN(id) ? undefined : (isAdmin ? id : undefined),
+            id: isNaN(id) ? undefined : id,
             name: name,
             email: {
                 email: email
             }
         }
     });
+
+    if (users.length == 0) {
+        return res.send(users);
+    }
 
     if (!isAdmin && users.length > 1) {
         const error: BaseError = {
@@ -69,7 +89,14 @@ router.get('/api/users', async (req, res) => {
         return res.status(error.status).send({ error: error });
     }
 
-    return res.send(JSON.stringify(users));
+    if (isAuthUser) {
+        const userid = (authUser as AccessTokenPayload).userid;
+        if (userid != users[0].id) {
+            return res.status(403).send({ error: 'IDs did not match' });
+        }
+    }
+
+    return res.send(users);
 });
 
 interface UserPost {
@@ -86,6 +113,13 @@ router.post('/api/users', async (req, res) => {
     const email = req.body.email as string;
     const password = req.body.password as string;
     const captcha = req.body.captcha as string;
+
+    {
+        const error = await validateCaptcha(captcha, 'captcha');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
+        }
+    }
 
     {
         const error = validateUserName(name, 'name');
@@ -108,13 +142,6 @@ router.post('/api/users', async (req, res) => {
         }
     }
 
-    {
-        const error = await validateCaptcha(captcha, 'captcha');
-        if (error != null) {
-            return res.status(error.status).send({ error: error });
-        }
-    }
-
     const salt = generateSalt();
     const hashedPassword = new TextEncoder().encode(hashPassword(password, salt));
     const hashedSalt = hashSalt(salt);
@@ -125,6 +152,8 @@ router.post('/api/users', async (req, res) => {
         password: Array.from(hashedPassword),
         salt: hashedSalt
     };
+
+    // TODO: Send verification email
 
     try {
         const insertedUser = await prisma.user.create({
@@ -169,6 +198,23 @@ interface UserPatch {
 }
 
 router.patch('/api/users/:id', async (req, res) => {
+    const authUser = await validateAuthHeader(req.headers.authorization);
+    if (typeof authUser == 'number') {
+        return res.sendStatus(authUser);
+    }
+
+    {
+        const user = await prisma.user.findFirst({
+            where: {
+                id: authUser.userid
+            }
+        });
+
+        if (user == null) {
+            return res.status(400).send({ error: 'No user found' });
+        }
+    }
+
     const id = Number(req.params.id);
     if (isNaN(id)) {
         const error: BaseError = {
@@ -179,6 +225,18 @@ router.patch('/api/users/:id', async (req, res) => {
         };
 
         return res.status(error.status).send({ error: error });
+    }
+
+    if (authUser.userid != id) {
+        return res.status(400).send({ error: 'IDs don\'t match' });
+    }
+
+    const captcha = req.body.captcha as string;
+    {
+        const error = await validateCaptcha(captcha, 'captcha');
+        if (error != null) {
+            return res.status(error.status).send({ error: error });
+        }
     }
 
     const name = req.body.name as string;
@@ -205,27 +263,6 @@ router.patch('/api/users/:id', async (req, res) => {
         }
     }
 
-    const password2 = req.body.password2 as string;
-    if (password2 == undefined) {
-        const error: BaseError = {
-            type: ErrorType.WasNull,
-            title: 'Missing password2 parameter',
-            status: 400,
-            detail: 'password parameter was specified, but password2 parameter was not'
-        };
-        return res.status(error.status).send({ error: error });
-    }
-
-    if (password != password2) {
-        const error: BaseError = {
-            type: ErrorType.PasswordsMismatch,
-            title: 'passwords did not match',
-            status: 400,
-            detail: 'password parameter and password2 parameter did not match'
-        };
-        return res.status(error.status).send({ error: error });
-    }
-
     const salt = generateSalt();
     const hashedPassword = new TextEncoder().encode(hashPassword(password, salt));
     const hashedSalt = hashSalt(salt);
@@ -234,31 +271,38 @@ router.patch('/api/users/:id', async (req, res) => {
         id: id,
         name: name,
         email: email,
-        password: hashedPassword && Array.from(hashedPassword),
+        password: Array.from(hashedPassword),
         salt: hashedSalt
     };
 
-    const updatedUser = await prisma.user.update({
-        where: {
-            id: user.id
-        },
-        data: {
-            name: user.name,
-            email: {
-                update: {
-                    email: user.email,
-                }
+    // TODO: Send verification email
+
+    try {
+        const updatedUser = await prisma.user.update({
+            where: {
+                id: user.id
             },
-            password: {
-                update: {
-                    password: user.password,
-                    salt: user.salt
+            data: {
+                name: user.name,
+                email: {
+                    update: {
+                        email: user.email,
+                    }
+                },
+                password: {
+                    update: {
+                        password: user.password,
+                        salt: user.salt
+                    }
                 }
             }
-        }
-    });
+        });
 
-    return res.send({ user: updatedUser });
+        return res.send({ user: updatedUser });
+    } catch (e) {
+        const error = generateErrorFromPrismaException(e);
+        return res.status(error.status).send({ error: error });
+    }
 });
 
 export default router;
