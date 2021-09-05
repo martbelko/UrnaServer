@@ -30,6 +30,7 @@ function Login(): JSX.Element {
                     alert('Logged successfully');
 
                     history.push('/update');
+                    history.go(0);
                 },
                 response => console.log(`Error: ${response}`));
         }

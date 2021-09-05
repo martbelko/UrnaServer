@@ -50,7 +50,7 @@ router.post('/auth/login', async (req, res) => {
     }
 
     if (hasMaximumTries(ip)) {
-        return res.send({ error: 'Maximum number of tries exceeded' });
+        return res.status(403).send({ error: 'Maximum number of tries exceeded' });
     }
 
     const username = req.body.username as string;
@@ -190,7 +190,7 @@ router.delete('/auth/logout', async (req, res) => {
         return res.sendStatus(accessTokenPayload);
     }
 
-    const refreshToken = req.body.refreshToken as string | undefined;
+    const refreshToken = req.body.refreshToken as string;
     if (refreshToken == undefined) {
         const error = new NullError('refreshToken');
         return res.status(error.status).send({ error: error });
@@ -199,7 +199,8 @@ router.delete('/auth/logout', async (req, res) => {
     const count = await prisma.refreshToken.deleteMany({
         where: {
             id: accessTokenPayload.refreshTokenId,
-            userID: accessTokenPayload.userid
+            userID: accessTokenPayload.userid,
+            token: refreshToken
         }
     });
 

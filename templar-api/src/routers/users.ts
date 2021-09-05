@@ -202,18 +202,6 @@ router.patch('/api/users/:id', async (req, res) => {
         return res.sendStatus(authUser);
     }
 
-    {
-        const user = await prisma.user.findFirst({
-            where: {
-                id: authUser.userid
-            }
-        });
-
-        if (user == null) {
-            return res.status(400).send({ error: 'No user found' });
-        }
-    }
-
     const id = Number(req.params.id);
     if (isNaN(id)) {
         const error: BaseError = {
@@ -230,6 +218,18 @@ router.patch('/api/users/:id', async (req, res) => {
         return res.status(400).send({ error: 'IDs don\'t match' });
     }
 
+    {
+        const user = await prisma.user.findFirst({
+            where: {
+                id: authUser.userid
+            }
+        });
+
+        if (user == null) {
+            return res.status(400).send({ error: 'No user found' });
+        }
+    }
+
     const captcha = req.body.captcha as string;
     {
         const error = await validateCaptcha(captcha, 'captcha');
@@ -239,6 +239,7 @@ router.patch('/api/users/:id', async (req, res) => {
     }
 
     const name = req.body.name as string;
+    if (name != undefined)
     {
         const error = validateUserName(name, 'name');
         if (error != null) {
@@ -247,6 +248,7 @@ router.patch('/api/users/:id', async (req, res) => {
     }
 
     const email = req.body.email as string;
+    if (email != undefined)
     {
         const error = validateUserEmail(email, 'email');
         if (error != null) {
@@ -255,6 +257,7 @@ router.patch('/api/users/:id', async (req, res) => {
     }
 
     const password = req.body.password as string;
+    if (password != undefined)
     {
         const error = validatePassword(password, 'password');
         if (error != null) {
@@ -270,8 +273,8 @@ router.patch('/api/users/:id', async (req, res) => {
         id: id,
         name: name,
         email: email,
-        password: Array.from(hashedPassword),
-        salt: hashedSalt
+        password: password == undefined ? undefined : Array.from(hashedPassword),
+        salt: password == undefined ? undefined : hashedSalt
     };
 
     // TODO: Send verification email

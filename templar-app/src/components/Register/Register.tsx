@@ -133,6 +133,7 @@ function Register(): JSX.Element {
                     } else {
                         alert('Success!');
                         history.push('/login');
+                        history.go(0);
                     }
                 },
                 reason => console.log(`Error: ${reason}`));

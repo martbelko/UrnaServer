@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
@@ -63,12 +63,41 @@ const validationSchema = Yup.object().shape({
         .min(minUserNameLen, `username must be at least ${minUserNameLen} characters`)
         .max(maxUserNameLen, `username must be at most ${maxUserNameLen} characters`)
         .test('unique', 'username already in use', async val => {
+            const userid = localStorage.getItem('userid') as string;
+            const response = await makeAuthRequest(`api/users?id=${userid}`,
+                localStorage.getItem('accessToken') as string,
+                RequestMethod.GET, undefined);
+
+            if (!response.ok) {
+                return true;
+            }
+
+            const currUser = await response.json();
+            if (currUser[0].name == val) {
+                return true;
+            }
+
             const user = await makeRequest(`api/users?name=${val}`, RequestMethod.GET, undefined);
             return await isUnique(user);
         }),
     email: Yup.string()
         .email('Not valid email')
         .test('unique', 'email already in use', async val => {
+            const userid = localStorage.getItem('userid') as string;
+            const response = await makeAuthRequest(`api/users?id=${userid}`,
+                localStorage.getItem('accessToken') as string,
+                RequestMethod.GET,
+                undefined);
+
+            if (!response.ok) {
+                return true;
+            }
+
+            const currUser = await response.json();
+            if (currUser[0].email.email == val) {
+                return true;
+            }
+
             const user = await makeRequest(`api/users?email=${val}`, RequestMethod.GET, undefined);
             return await isUnique(user);
         }),
@@ -80,7 +109,7 @@ const validationSchema = Yup.object().shape({
                 return containsLower(val) && containsCapital(val) && containsNumber(val);
             }
 
-            return false;
+            return true;
         }),
     passwordVerify: Yup.string()
         .oneOf([Yup.ref('password')], 'Passwords must match'),
@@ -98,13 +127,16 @@ function Update(): JSX.Element {
         },
         validationSchema: validationSchema,
         onSubmit: async (values) => {
-            await makeRequest(`api/users/${userid}`, RequestMethod.PATCH, JSON.stringify({
-                name: values.username,
-                email: values.email,
-                password: values.password,
-                captcha: captcha
+            await makeAuthRequest(`api/users/${userid}`,
+                localStorage.getItem('accessToken') as string,
+                RequestMethod.PATCH,
+                JSON.stringify({
+                    name: values.username,
+                    email: values.email,
+                    password: undefined,
+                    captcha: captcha
                 // TODO: Add discord name
-            }))
+                }))
                 .then(async response => {
                     const json = await response.json();
                     if (json.error != undefined) {
@@ -120,7 +152,8 @@ function Update(): JSX.Element {
                                 formikParameters.errors.email = 'Email already in use';
                             }
                         } else {
-                            formikParameters.errors.username = json.error.detail; // TODO: General error
+                            console.log(errorMessage);
+                            formikParameters.errors.username = 'errorMessage'; // TODO: General error
                         }
                     } else {
                         alert('Success!');
@@ -152,7 +185,6 @@ function Update(): JSX.Element {
                     email: json[0].email.email
                 });
             } else {
-                console.log(await response.json());
                 setUser({
                     name: '',
                     email: ''
