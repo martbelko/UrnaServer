@@ -133,7 +133,7 @@ function Update(): JSX.Element {
                 JSON.stringify({
                     name: values.username,
                     email: values.email,
-                    password: undefined,
+                    password: values.password,
                     captcha: captcha
                 // TODO: Add discord name
                 }))
@@ -141,7 +141,7 @@ function Update(): JSX.Element {
                     const json = await response.json();
                     if (json.error != undefined) {
                         const uniqueTextError = 'Unique constraint failed on the fields: (`';
-                        const errorMessage = json.error.detail as string;
+                        const errorMessage = json.error.detail == undefined ? json.error as string : json.error.detail as string;
                         const uniqueIndex = errorMessage.indexOf(uniqueTextError);
                         if (uniqueIndex >= 0) {
                             const fieldIndex = uniqueIndex + uniqueTextError.length;
@@ -152,11 +152,11 @@ function Update(): JSX.Element {
                                 formikParameters.errors.email = 'Email already in use';
                             }
                         } else {
-                            console.log(errorMessage);
-                            formikParameters.errors.username = 'errorMessage'; // TODO: General error
+                            formikParameters.errors.username = errorMessage; // TODO: General error
                         }
                     } else {
                         alert('Success!');
+                        history.go(0);
                     }
                 },
                 reason => console.log(`Error: ${reason}`));
