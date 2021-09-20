@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
 import * as Yup from 'yup';
-import { useFormik } from 'formik';
+import { FormikErrors, useFormik } from 'formik';
 
 import { minUserNameLen, maxUserNameLen, minPasswordLen, maxPasswordLen } from './../../../../templar-api/src/share';
 import { makeAuthRequest, makeRequest, RequestMethod } from '../../utils/request';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { AuthManager } from '../../utils/auth';
 
 function containsCapital(str: string): boolean {
     const capitals = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -58,65 +59,47 @@ async function isUnique(responseObject: Response): Promise<boolean> {
     return true;
 }
 
-const validationSchema = Yup.object().shape({
-    username: Yup.string()
-        .min(minUserNameLen, `username must be at least ${minUserNameLen} characters`)
-        .max(maxUserNameLen, `username must be at most ${maxUserNameLen} characters`)
-        .test('unique', 'username already in use', async val => {
-            const userid = localStorage.getItem('userid') as string;
-            const response = await makeAuthRequest(`api/users?id=${userid}`,
-                localStorage.getItem('accessToken') as string,
-                RequestMethod.GET, undefined);
+async function isFieldUnique(fieldName: string, text: string): Promise<boolean> {
+    const userid = AuthManager.getUserid();
+    const response = await makeAuthRequest(`api/users?id=${userid}`,
+        RequestMethod.GET, undefined);
 
-            if (!response.ok) {
-                return true;
-            }
+    if (response == null || !response.ok) {
+        console.log((await response?.json()).error);
+        return true;
+    }
 
-            const currUser = await response.json();
-            if (currUser[0].name == val) {
-                return true;
-            }
+    const currUser = await response.json();
+    if (currUser[0].name == text) {
+        return true;
+    }
 
-            const user = await makeRequest(`api/users?name=${val}`, RequestMethod.GET, undefined);
-            return await isUnique(user);
-        }),
-    email: Yup.string()
-        .email('Not valid email')
-        .test('unique', 'email already in use', async val => {
-            const userid = localStorage.getItem('userid') as string;
-            const response = await makeAuthRequest(`api/users?id=${userid}`,
-                localStorage.getItem('accessToken') as string,
-                RequestMethod.GET,
-                undefined);
-
-            if (!response.ok) {
-                return true;
-            }
-
-            const currUser = await response.json();
-            if (currUser[0].email.email == val) {
-                return true;
-            }
-
-            const user = await makeRequest(`api/users?email=${val}`, RequestMethod.GET, undefined);
-            return await isUnique(user);
-        }),
-    password: Yup.string()
-        .min(minPasswordLen, `password must be at least ${minPasswordLen} characters`)
-        .max(maxPasswordLen, `password must be at most ${maxPasswordLen} characters`)
-        .test('lower', 'Password does not contain capital letter, lower letter or number', val => {
-            if (val != undefined) {
-                return containsLower(val) && containsCapital(val) && containsNumber(val);
-            }
-
-            return true;
-        }),
-    passwordVerify: Yup.string()
-        .oneOf([Yup.ref('password')], 'Passwords must match'),
-    discordName: Yup.string()
-});
+    const user = await makeRequest(`api/users?${fieldName}=${text}`, RequestMethod.GET, undefined);
+    return await isUnique(user);
+}
 
 function Update(): JSX.Element {
+    const validationSchema = Yup.object().shape({
+        username: Yup.string()
+            .min(minUserNameLen, `username must be at least ${minUserNameLen} characters`)
+            .max(maxUserNameLen, `username must be at most ${maxUserNameLen} characters`),
+        email: Yup.string()
+            .email('Not valid email'),
+        password: Yup.string()
+            .min(minPasswordLen, `password must be at least ${minPasswordLen} characters`)
+            .max(maxPasswordLen, `password must be at most ${maxPasswordLen} characters`)
+            .test('lower', 'Password does not contain capital letter, lower letter or number', val => {
+                if (val != undefined) {
+                    return containsLower(val) && containsCapital(val) && containsNumber(val);
+                }
+
+                return true;
+            }),
+        passwordVerify: Yup.string()
+            .oneOf([Yup.ref('password')], 'Passwords must match'),
+        discordName: Yup.string()
+    });
+
     const formikParameters = useFormik({
         initialValues: {
             username: '',
@@ -128,7 +111,6 @@ function Update(): JSX.Element {
         validationSchema: validationSchema,
         onSubmit: async (values) => {
             await makeAuthRequest(`api/users/${userid}`,
-                localStorage.getItem('accessToken') as string,
                 RequestMethod.PATCH,
                 JSON.stringify({
                     name: values.username,
@@ -138,6 +120,10 @@ function Update(): JSX.Element {
                 // TODO: Add discord name
                 }))
                 .then(async response => {
+                    if (response == null) {
+                        return formikParameters.errors.username = 'Unknown error'; // TODO: General error
+                    }
+
                     const json = await response.json();
                     if (json.error != undefined) {
                         const uniqueTextError = 'Unique constraint failed on the fields: (`';
@@ -163,9 +149,35 @@ function Update(): JSX.Element {
         }
     });
 
-    const accessToken = localStorage.getItem('accessToken');
-    const useridStr = localStorage.getItem('userid');
-    const userid = Number(useridStr);
+    useEffect(() => {
+        const timeoutId = setTimeout(async () => {
+            const isUnique = await isFieldUnique('name', formikParameters.values.username);
+            console.log(isUnique);
+            if (isUnique == false) {
+                formikParameters.setErrors({
+                    username: 'Username already in use'
+                });
+            }
+        }, 1000);
+
+        return () => clearTimeout(timeoutId);
+    }, [formikParameters.values.username]);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(async () => {
+            const isUnique = await isFieldUnique('email', formikParameters.values.email);
+            if (!isUnique) {
+                formikParameters.setErrors({
+                    email: 'Email already in use'
+                });
+            }
+        }, 1000);
+
+        return () => clearTimeout(timeoutId);
+    }, [formikParameters.values.email]);
+
+    const userid = AuthManager.getUserid();
+    const accessToken = AuthManager.getAccessToken();
 
     const [user, setUser] = useState({
         name: '',
@@ -176,9 +188,9 @@ function Update(): JSX.Element {
 
     useEffect(() => {
         async function queryUserData() {
-            const response = await makeAuthRequest(`api/users?id=${userid}`, accessToken as string,
-                RequestMethod.GET, undefined);
-            if (response.ok) {
+            const userid = AuthManager.getUserid();
+            const response = await makeAuthRequest(`api/users?id=${userid}`, RequestMethod.GET, undefined);
+            if (response != null && response.ok) {
                 const json = await response.json();
                 setUser({
                     name: json[0].name,
@@ -195,7 +207,7 @@ function Update(): JSX.Element {
         queryUserData();
     }, []);
 
-    if (accessToken == null || useridStr == null) {
+    if (accessToken == null || userid == null) {
         return <div>Not logged</div>;
     }
 

@@ -36,18 +36,18 @@ router.get('/api/users', async (req, res) => {
     }
 
     const isAdmin = await isPrivilegedAdmin();
-    const isAuthUser =  !isAdmin && typeof authUser != 'number';
+    const isAuthUser = !isAdmin && typeof authUser != 'number';
 
     const id = Number(req.query.id as string | undefined);
     const name = req.query.name as string | undefined;
     const email = req.query.email as string | undefined;
 
     if (!isAdmin && !isAuthUser && isNaN(id) && name == undefined && email == undefined) {
-        return res.status(403).send({ error: 'Multiple results found' });
+        return res.status(401).send({ error: 'Multiple results found' });
     }
 
     if (!isAdmin && !isAuthUser && !isNaN(id)) {
-        return res.status(403).send({ error: 'id parameter cannot be specified' }); // TODO: Send BaseError
+        return res.status(401).send({ error: 'id parameter cannot be specified' }); // TODO: Send BaseError
     }
 
     const users = await prisma.user.findMany({
@@ -81,7 +81,7 @@ router.get('/api/users', async (req, res) => {
         const error: BaseError = {
             type: ErrorType.MultipleResults,
             title: 'Multiple results',
-            status: 403,
+            status: 401,
             detail: 'Multiple results found'
         };
 
@@ -91,7 +91,7 @@ router.get('/api/users', async (req, res) => {
     if (isAuthUser) {
         const userid = (authUser as AccessTokenPayload).userid;
         if (userid != users[0].id) {
-            return res.status(403).send({ error: 'IDs did not match' });
+            return res.sendStatus(401);
         }
     }
 
@@ -199,8 +199,10 @@ interface UserPatch {
 router.patch('/api/users/:id', async (req, res) => {
     const authUser = await validateAuthHeader(req.headers.authorization);
     if (typeof authUser == 'number') {
-        return res.sendStatus(authUser);
+        return res.sendStatus(401);
     }
+
+    // console.log(req.body.password);
 
     const id = Number(req.params.id);
     if (isNaN(id)) {

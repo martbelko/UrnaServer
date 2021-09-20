@@ -111,7 +111,7 @@ function Register(): JSX.Element {
                 email: values.email,
                 password: values.password,
                 captcha: captcha
-                // TODO: Add discord name
+                // TODO: Add discord name ?
             }))
                 .then(async response => {
                     const json = await response.json();

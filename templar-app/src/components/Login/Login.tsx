@@ -3,6 +3,7 @@ import { useFormik } from 'formik';
 
 import { makeRequest, RequestMethod } from '../../utils/request';
 import { useHistory } from 'react-router';
+import { AuthManager } from '../../utils/auth';
 
 function Login(): JSX.Element {
     const history = useHistory();
@@ -23,9 +24,9 @@ function Login(): JSX.Element {
                         return formikParameters.errors.username = json.error;
                     }
 
-                    localStorage.setItem('userid', (json.userid as number).toString());
-                    localStorage.setItem('accessToken', json.accessToken as string);
-                    localStorage.setItem('refreshToken', json.refreshToken as string);
+                    AuthManager.setUserid(json.userid);
+                    AuthManager.setAccessToken(json.accessToken);
+                    AuthManager.setRefreshToken(json.refreshToken);
 
                     alert('Logged successfully');
 
@@ -37,7 +38,7 @@ function Login(): JSX.Element {
     });
 
     useEffect(() => {
-        console.log(localStorage.getItem('accessToken'));
+        console.log(AuthManager.getAccessToken());
     }, []);
 
     return (

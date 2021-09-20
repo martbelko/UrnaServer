@@ -17,12 +17,12 @@ router.post('/auth/token', async (req, res) => {
 
     const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string);
     if (typeof payload == 'string') {
-        return 401;
+        return res.sendStatus(401);
     }
 
     const refreshTokenPayload = payload as unknown as RefreshTokenPayload;
     if (refreshTokenPayload.userid == undefined || refreshTokenPayload.createdAt == undefined) {
-        return 401;
+        return res.sendStatus(401);
     }
 
     const refreshTokenDb = await prisma.refreshToken.findFirst({

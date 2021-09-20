@@ -26,8 +26,8 @@ const app = express();
 const port = Number(process.env.PORT as string);
 
 const rateLimiter = new Map<string, number>();
-const clearIntervalSeconds = 60;
-const maximumRequeststhreshold = 60;
+const clearIntervalSeconds = 1;
+const maximumRequeststhreshold = 10;
 
 setInterval(() => {
     rateLimiter.clear();
@@ -47,7 +47,7 @@ app.use((req, res, next) => {
     } else if (number < maximumRequeststhreshold) {
         rateLimiter.set(ip, number + 1);
     } else {
-        return res.status(500).send({ error: `Maximum request threshold ${maximumRequeststhreshold}requests/${clearIntervalSeconds}s exceeded` });
+        return res.status(403).send({ error: `Maximum request threshold ${maximumRequeststhreshold}requests/${clearIntervalSeconds}s exceeded` });
     }
 
     next();
@@ -101,7 +101,7 @@ app.get('/api/verify-email/:token', emailRouter);
 app.post('/api/verify-email', emailRouter);
 
 async function main() {
-    await prisma.refreshToken.deleteMany();
+    //await prisma.refreshToken.deleteMany();
     app.listen(port, () => console.log(`Listening on port ${port}`));
 }
 
