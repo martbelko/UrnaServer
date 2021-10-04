@@ -47,7 +47,7 @@ app.use((req, res, next) => {
     } else if (number < maximumRequeststhreshold) {
         rateLimiter.set(ip, number + 1);
     } else {
-        return res.status(403).send({ error: `Maximum request threshold ${maximumRequeststhreshold}requests/${clearIntervalSeconds}s exceeded` });
+        return res.status(403).send({ error: `Maximum request threshold ${maximumRequeststhreshold}requests/${clearIntervalSeconds}s exceeded` }); // TODO: Return BaseError
     }
 
     next();
