@@ -64,11 +64,6 @@ app.get('/', async (req, res) => {
     return res.send('OK');
 });
 
-const options = {
-    key: fs.readFileSync('key.pem'),
-    cert: fs.readFileSync('server.crt')
-};
-
 app.get('/api/admins', adminRouter);
 app.post('/api/admins', adminRouter);
 app.patch('/api/admins/:id', adminRouter);
