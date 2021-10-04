@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import * as Yup from 'yup';
-import { FormikErrors, useFormik } from 'formik';
+import { useFormik } from 'formik';
 
 import { minUserNameLen, maxUserNameLen, minPasswordLen, maxPasswordLen } from './../../../../templar-api/src/share';
 import { makeAuthRequest, makeRequest, RequestMethod } from '../../utils/request';
@@ -100,6 +100,8 @@ function Update(): JSX.Element {
         discordName: Yup.string()
     });
 
+    const [generalError, setGeneralError] = useState<string | undefined>('');
+
     const formikParameters = useFormik({
         initialValues: {
             username: '',
@@ -121,7 +123,7 @@ function Update(): JSX.Element {
                 }))
                 .then(async response => {
                     if (response == null) {
-                        return formikParameters.errors.username = 'Unknown error'; // TODO: General error
+                        return setGeneralError('Unknown error');
                     }
 
                     const json = await response.json();
@@ -133,12 +135,14 @@ function Update(): JSX.Element {
                             const fieldIndex = uniqueIndex + uniqueTextError.length;
                             const field = errorMessage.substr(fieldIndex);
                             if (field.indexOf('name') >= 0) {
-                                formikParameters.errors.username = 'Username already in use';
+                                formikParameters.setErrors({
+                                    username: 'Username already in use'
+                                });
                             } else if (field.indexOf('email') >= 0) {
                                 formikParameters.errors.email = 'Email already in use';
                             }
                         } else {
-                            formikParameters.errors.username = errorMessage; // TODO: General error
+                            setGeneralError(errorMessage);
                         }
                     } else {
                         alert('Success!');
@@ -222,6 +226,7 @@ function Update(): JSX.Element {
         <div>
             <form onSubmit={formikParameters.handleSubmit}>
                 <div>
+                    {generalError && <span>{generalError}</span>}
                     <label>
                     Username:
                         <input
