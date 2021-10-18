@@ -18,12 +18,12 @@ export function validateDateHeader(req: Request, res: Response, next: NextFuncti
 
     const timeNow = new Date(Date.now());
     const diffTime = dateDiff(headerDate, timeNow);
-    if (diffTime > MaximumTimeOffsetSeconds) {
+    if (diffTime > MaximumTimeOffsetSeconds * 1000) {
         const error: BaseError = {
             type: ErrorType.ExpiredTimestamp,
-            title: 'Timestamp expired',
+            title: 'Expired timestamp',
             status: 401,
-            detail: `Timestamp expired: Given timestamp ${headerDate} not within ${MaximumTimeOffsetSeconds} of server time ${timeNow}`
+            detail: `Expired timestamp: Given timestamp ${headerDate} not within ${MaximumTimeOffsetSeconds} seconds of server time ${timeNow}`
         };
 
         return res.status(error.status).send({ error: error });
