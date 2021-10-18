@@ -1,7 +1,7 @@
 import { PrismaClientInitializationError, PrismaClientKnownRequestError, PrismaClientRustPanicError, PrismaClientUnknownRequestError, PrismaClientValidationError } from '@prisma/client/runtime';
 
 export interface BaseError {
-    type: string; // /errors/incorrect-user-pass
+    type: string; // /errors/incorrect-user-credentials
     title: string; // Incorrect username or password.
     status: number; // 404
     detail: string; // Authentication failed due to incorrect username or password.
@@ -43,8 +43,11 @@ export enum ErrorType {
     InvalidTimestamp = '/errors/invalid-timestamp',
     ExpiredTimestamp = '/errors/expired-timestamp',
     InvalidCaptcha = '/errors/invalid-captcha',
-    MultipleResults = '/errors/multiple-results'
+    MultipleResults = '/errors/multiple-results',
+    InvalidAuthHeader = '/errors/invalid-auth-header'
 }
+
+export const isError = (variable: unknown): variable is BaseError => (variable as BaseError).type != undefined;
 
 export function generateErrorFromPrismaException(e: unknown): BaseError {
     if (e instanceof PrismaClientInitializationError) {
