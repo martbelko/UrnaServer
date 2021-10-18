@@ -1,13 +1,15 @@
 {
     "compilerOptions": {
       "sourceMap": true,
-      "outDir": "dist",
+      "outDir": "./dist",
       "strict": true,
       "lib": ["esnext"],
       "target": "es2021",
       "esModuleInterop": true,
-      "module": "CommonJS"
+      "module": "CommonJS",
+      "moduleResolution": "node",
+      "baseUrl": "./src"
     },
     "include": ["src/**/*.ts"],
-    "exclude": ["dist", "prisma", "tests"]
+    "exclude": ["dist", "prisma"]
   }
