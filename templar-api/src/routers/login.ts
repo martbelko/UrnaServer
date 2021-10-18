@@ -3,7 +3,7 @@ import express from 'express';
 import { TextDecoder } from 'util';
 import jwt from 'jsonwebtoken';
 import { AccessTokenPayload, RefreshTokenPayload, generateAccessToken, generateRefreshToken } from '../auth/auth';
-import { NullError } from '../error';
+import { isError, NullError } from '../error';
 import validateAuthHeader from '../utils/authHeaderValidator';
 import dotenv from 'dotenv';
 
@@ -136,8 +136,8 @@ router.post('/auth/login', async (req, res) => {
 
 router.delete('/auth/logout', async (req, res) => {
     const accessTokenPayload = await validateAuthHeader(req.headers.authorization);
-    if (typeof accessTokenPayload == 'number') {
-        return res.sendStatus(accessTokenPayload);
+    if (isError(accessTokenPayload)) {
+        return res.send(accessTokenPayload).status(accessTokenPayload.status);
     }
 
     const refreshToken = req.body.refreshToken as string;

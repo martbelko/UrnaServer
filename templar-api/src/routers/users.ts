@@ -5,7 +5,7 @@ import { TextEncoder } from 'util';
 import { generateSalt, hashPassword, hashSalt } from './../database';
 import { validateUserEmail, validateUserName } from './../validators/userValidator';
 import { validatePassword } from './../validators/passwordValidator';
-import BaseError, { ErrorType, generateErrorFromPrismaException } from './../error';
+import BaseError, { ErrorType, generateErrorFromPrismaException, isError } from './../error';
 import { validateAuthHeader } from '../utils/authHeaderValidator';
 import { validateCaptcha } from '../validators/captchaValidator';
 import { AccessTokenPayload } from '../auth/auth';
@@ -16,7 +16,7 @@ export const router = express.Router();
 router.get('/api/users', async (req, res) => {
     const authUser = await validateAuthHeader(req.headers.authorization);
     async function isPrivilegedAdmin(): Promise<boolean> {
-        if (typeof authUser == 'number') {
+        if (isError(authUser)) {
             return false;
         }
 
@@ -198,11 +198,9 @@ interface UserPatch {
 
 router.patch('/api/users/:id', async (req, res) => {
     const authUser = await validateAuthHeader(req.headers.authorization);
-    if (typeof authUser == 'number') {
+    if (isError(authUser)) {
         return res.sendStatus(401);
     }
-
-    // console.log(req.body.password);
 
     const id = Number(req.params.id);
     if (isNaN(id)) {
