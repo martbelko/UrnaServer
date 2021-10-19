@@ -13,6 +13,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  working-directory: ./templar-api
   postgres-init:
     # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
@@ -38,6 +39,7 @@ jobs:
     steps:
       # Downloads a copy of the code in your repository before running CI tests
       - name: Check out repository code
+        working-directory: ./templar-api
         uses: actions/checkout@v2
 
       # Performs a clean installation of all dependencies in the `package.json` file
@@ -57,16 +59,6 @@ jobs:
           POSTGRES_HOST: postgres
           # The default PostgreSQL port
           POSTGRES_PORT: 5432
-
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checkout the Repo
-      - uses: actions/checkout@v2
 
       # Install Node 16
       - name: Setup Node
