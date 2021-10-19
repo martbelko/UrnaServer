@@ -1,4 +1,4 @@
-name: test
+name: RestAPI tests
 on: push
 jobs:
   test:
