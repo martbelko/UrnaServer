@@ -24,12 +24,17 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mydb
     steps:
-      - working-directory: ./templar-api
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: '16.x'
-      - run: npm ci
+      - name: Init
+        working-directory: ./templar-api
+        run: npm ci
       # Create the database
-      - run: npx prisma migrate deploy
-      - run: npm test
+      - name: Create the database
+        working-directory: ./templar-api
+        run: npx prisma migrate deploy
+      - name: Run tests
+        working-directory: ./templar-api
+        run: npm test
