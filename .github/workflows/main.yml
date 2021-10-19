@@ -1,91 +1,34 @@
-# This is a basic workflow to help you get started with Actions
-
-name: CI
-
-# Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [master, tests]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+name: test
+on: push
 jobs:
-  postgres-init:
-    # Containers must run in Linux based operating systems
+  test:
     runs-on: ubuntu-latest
-    # Docker Hub image that `container-job` executes in
-    container: node:10.18-jessie
-
     # Service containers to run with `container-job`
     services:
       # Label used to access the service container
       postgres:
-        # Docker Hub image
+        # Docker Hub PostgreSQL image
         image: postgres
         # Provide the password for postgres
         env:
-          POSTGRES_PASSWORD: 123456
-        # Set health checks to wait until postgres has started
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mydb
     steps:
-      # Downloads a copy of the code in your repository before running CI tests
-      - name: Check out repository code
-        uses: actions/checkout@v2
-
-      # Performs a clean installation of all dependencies in the `package.json` file
-      # For more information, see https://docs.npmjs.com/cli/ci.html
-      - name: Install dependencies
-        working-directory: ./templar-api
-        run: npm ci
-
-      - name: Connect to PostgreSQL
-        working-directory: ./templar-api
-        # Runs a script that creates a PostgreSQL table, populates
-        # the table with data, and then retrieves the data.
-        run: node client.js
-        # Environment variables used by the `client.js` script to create a new PostgreSQL table.
-        env:
-          # The hostname used to communicate with the PostgreSQL service container
-          POSTGRES_HOST: postgres
-          # The default PostgreSQL port
-          POSTGRES_PORT: 5432
-
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checkout the Repo
       - uses: actions/checkout@v2
-
-      # Install Node 16
-      - name: Setup Node
-        uses: actions/setup-node@v1
+      - uses: actions/setup-node@v1
         with:
-          node-version: 16
-
-      # Install dependencies
-      - name: Install dependencies
-        working-directory: ./templar-api
-        run: npm install
-
-      - name: Setup prisma
-        working-directory: ./templar-api
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: postgresql://postgres:123456@localhost:5432/mydb?schema=public
-
-      # Run tests
-      - name: Run tests
-        working-directory: ./templar-api
-        run: npm test
+          node-version: '16.x'
+      - run: npm ci
+      # Create the database
+      - run: npx prisma migrate deploy
+      - run: npm test
