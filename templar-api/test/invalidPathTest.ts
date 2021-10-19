@@ -327,7 +327,7 @@ describe('Test invalid api paths with expired timestamp', () => {
 
         apis.delete('/api/should-not-work')
             .set('last-modified', expiredTimestamp.toUTCString())
-            .expect(501)
+            .expect(EXPIRED_TIMESTAMP_ERROR_STATUS)
             .expect((res) => {
                 const error = res.body.error as BaseError | undefined;
                 if (error == undefined)
