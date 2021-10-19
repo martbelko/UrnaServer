@@ -34,6 +34,10 @@ jobs:
         working-directory: ./templar-api
         run: npm install
 
+      - name: Setup prisma
+        working-directory: ./templar-api
+        run: npx prisma migrate deploy
+
       # Run tests
       - name: Run tests
         working-directory: ./templar-api
