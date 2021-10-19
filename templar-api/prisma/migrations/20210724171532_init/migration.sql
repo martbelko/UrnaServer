@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Password" ALTER COLUMN "salt" SET NOT NULL,
-ALTER COLUMN "salt" SET DATA TYPE TEXT;
