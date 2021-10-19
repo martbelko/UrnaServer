@@ -24,7 +24,7 @@ model User {
   refreshTokens RefreshToken[]
 
   admin Admin?
-  vip   Vip[]
+  vips  Vip[]
 }
 
 model RefreshToken {
@@ -92,7 +92,7 @@ model Ban {
   id Int @id @default(autoincrement())
 
   adminID      Int
-  targetInfoID Int
+  targetInfoID Int @unique
 
   unbanID Int? @unique
 

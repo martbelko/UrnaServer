@@ -60,7 +60,7 @@ router.get('/api/users', async (req, res) => {
                     verified: isAdmin
                 }
             },
-            Vip: isAdmin,
+            vips: isAdmin,
             createdAt: isAdmin,
             updatedAt: false
         },
