@@ -38,7 +38,6 @@ jobs:
     steps:
       # Downloads a copy of the code in your repository before running CI tests
       - name: Check out repository code
-        working-directory: ./templar-api
         uses: actions/checkout@v2
 
       # Performs a clean installation of all dependencies in the `package.json` file
