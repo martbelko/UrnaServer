@@ -24,6 +24,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mydb
     steps:
+      - working-directory: ./templar-api
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
