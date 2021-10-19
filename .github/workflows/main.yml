@@ -30,7 +30,11 @@ jobs:
           node-version: 16
 
       # Install dependencies
-      - run: npm install
+      - name: Install dependencies
+        working-directory: ./templar-api
+        run: npm install
 
       # Run tests
-      - run: npm test
+      - name: Run tests
+        working-directory: ./templar-api
+        run: npm test
