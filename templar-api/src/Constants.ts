@@ -22,4 +22,7 @@ export class Constants {
     static readonly ALLOWED_USERNAME_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
 
     static readonly REST_PORT = Number(process.env.PORT);
+
+    static readonly ACCESS_TOKEN_EXPIRATION = 60; // Seconds
+    static readonly REFRESH_TOKEN_EXPIRATION = 60 * 60 * 24 * 7; // 1 week
 }

@@ -1,14 +1,14 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 
-import { UsersRoutes } from 'routers/Users/UsersRoutes';
+import { UsersRoutes } from './../Users/UsersRoutes';
 
 const prisma = new PrismaClient();
 
 interface UserGet {
-    id: number | undefined;
-    name: string | undefined;
-    email: string | undefined;
+    id: number;
+    name: string;
+    email: string;
 }
 
 export class UsersGetRouter {
@@ -19,6 +19,9 @@ export class UsersGetRouter {
                 name: req.query.name as string,
                 email: req.query.email as string
             };
+
+            console.log(user.id);
+            return res.sendStatus(200);
         });
     }
 

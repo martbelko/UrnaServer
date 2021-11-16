@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { TokenManager } from './authorization/TokenManager';
 import dotenv from 'dotenv';
 
 import { Constants } from './Constants';
@@ -12,6 +13,8 @@ async function main() {
     if (isNaN(port) || !isFinite(port) || port == 0) {
         throw new Error('Invalid port');
     }
+
+    TokenManager.init();
 
     Server.listen(port, () => console.log(`Listening on port ${port}`));
 }

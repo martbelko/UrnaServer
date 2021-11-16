@@ -1,5 +1,7 @@
 import cors from 'cors';
 import express from 'express';
+import { UsersGetRouter } from './routers/Users/UserGet';
+import { UsersRoutes } from './routers/Users/UsersRoutes';
 
 const app = express();
 
@@ -9,6 +11,9 @@ export class Server {
         app.use(cors());
         app.enable('trust proxy');
 
+        const userGetRouter = new UsersGetRouter();
+
+        app.get(UsersRoutes.GET, userGetRouter.getRouter());
         app.listen(port, callback);
     }
 }
