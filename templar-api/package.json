@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "eslint \"**/*.ts\" && ts-node ./src/index.ts",
-    "start:dist": "node ./dist/index.js",
+    "start": "eslint \"**/*.ts\" && ts-node ./src/main.ts",
+    "start:dist": "node ./dist/main.js",
     "build": "eslint \"**/*.ts\" && tsc",
     "seed": "ts-node ./prisma/seed.ts",
     "test": "mocha --check-leaks \"test/**/*.ts\""

@@ -18,8 +18,18 @@ async function main() {
         update: {},
         create: {
             name: 'CONSOLE',
-            email: 'martbelko@gmail.com',
-            passwordID: 0
+            email: {
+                create: {
+                    email: 'martbelko@gmail.com',
+                    verified: true
+                }
+            },
+            password: {
+                create: {
+                    password: 0,
+                    salt: 'a'
+                }
+            }
         }
     });
 
@@ -30,8 +40,18 @@ async function main() {
         update: {},
         create: {
             name: 'elektro',
-            email: 'matik.b@centrum.com',
-            passwordID: 0
+            email: {
+                create: {
+                    email: 'matik.b@centrum.com',
+                    verified: true
+                }
+            },
+            password: {
+                create: {
+                    password: 1,
+                    salt: 'b'
+                }
+            }
         }
     });
 
@@ -41,9 +61,14 @@ async function main() {
         },
         update: {},
         create: {
-            userID: consoleUser.id,
+            immunity: 5,
+            flags: 3,
             steamID: 'CONSOLE',
-            flags: 15
+            user: {
+                connect: {
+                    name: 'CONSOLE'
+                }
+            }
         }
     });
 
@@ -53,9 +78,14 @@ async function main() {
         },
         update: {},
         create: {
-            userID: meUser.id,
+            immunity: 99,
+            flags: 16,
             steamID: 'STEAM_0:1:4515611',
-            flags: 15
+            user: {
+                connect: {
+                    name: 'elektro'
+                }
+            }
         }
     });
 

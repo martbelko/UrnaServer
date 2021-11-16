@@ -8,7 +8,12 @@
       "esModuleInterop": true,
       "module": "CommonJS",
       "moduleResolution": "node",
-      "baseUrl": "./src"
+      "baseUrl": "./src",
+      "paths": {
+        "*": [
+          "src/*"
+        ]
+      },
     },
     "include": ["src/**/*.ts"],
     "exclude": ["dist", "prisma"]

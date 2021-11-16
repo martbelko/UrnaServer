@@ -1,4 +1,8 @@
-class Constants {
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+export class Constants {
     static readonly MIN_PASSWORD_LEN = 8;
     static readonly MAX_PASSWORD_LEN = 100;
 
@@ -16,4 +20,6 @@ class Constants {
     static readonly EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
     static readonly ALLOWED_USERNAME_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+
+    static readonly REST_PORT = Number(process.env.PORT);
 }
