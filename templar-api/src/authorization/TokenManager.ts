@@ -43,10 +43,6 @@ export class TokenManager {
         }
 
         const payload = jwtPayload as unknown as AccessTokenPayload;
-        if (isNaN(payload.userID) || !isFinite(payload.userID) || isNaN(payload.refreshTokenID) || !isFinite(payload.refreshTokenID)) {
-            return null;
-        }
-
         return payload;
     }
 
@@ -57,10 +53,6 @@ export class TokenManager {
         }
 
         const payload = jwtPayload as unknown as RefreshTokenPayload;
-        if (isNaN(payload.userID) || !isFinite(payload.userID)) {
-            return null;
-        }
-
         return payload;
     }
 
