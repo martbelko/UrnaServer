@@ -9,7 +9,21 @@ export interface Error {
 export enum ErrorID {
     INVALID_ID_FIELD = 'invalid-id-parameter',
     INVALID_NAME_FIELD = 'invalid-id-parameter',
-    INVALID_EMAIL_FIELD = 'invalid-id-parameter'
+    INVALID_EMAIL_FIELD = 'invalid-id-parameter',
+
+    NO_AUTH_HEADER = 'missing-auth-header',
+    INVALID_AUTH_HEADER = 'invalid-auth-header',
+    AUTH_TOKEN_EXPIRED = 'auth-token-expired'
+}
+
+export enum ErrorTitle {
+    INVALID_ID_FIELD = 'Invalid \'id\' parameter',
+    INVALID_NAME_FIELD = 'Invalid \'name\' parameter',
+    INVALID_EMAIL_FIELD = 'Invalid \'email\' parameter',
+
+    NO_AUTH_HEADER = 'Mising auth header',
+    INVALID_AUTH_HEADER = 'Invalid auth header',
+    AUTH_TOKEN_EXPIRED = 'Authorization token expired'
 }
 
 export enum StatusCode {
@@ -28,8 +42,37 @@ export enum StatusCode {
     SERVICE_UNAVAILABLE = 503 // The server was unavailable.
 }
 
-export enum ErrorTitle {
-    INVALID_ID_FIELD = 'Invalid \'id\' parameter',
-    INVALID_NAME_FIELD = 'Invalid \'name\' parameter',
-    INVALID_EMAIL_FIELD = 'Invalid \'email\' parameter',
+export class ErrorGenerator {
+    public static missingAuthHeader(instance: string): Error {
+        const error: Error = {
+            error: ErrorID.NO_AUTH_HEADER,
+            title: ErrorTitle.NO_AUTH_HEADER,
+            status: StatusCode.UNAUTHORIZED,
+            detail: 'Missing authorization header',
+            instance: instance
+        };
+        return error;
+    }
+
+    public static invalidAuthHeader(instance: string): Error {
+        const error: Error = {
+            error: ErrorID.INVALID_AUTH_HEADER,
+            title: ErrorTitle.INVALID_AUTH_HEADER,
+            status: StatusCode.UNAUTHORIZED,
+            detail: 'Invalid authorization header',
+            instance: instance
+        };
+        return error;
+    }
+
+    public static expiredAuthHeader(instance: string): Error {
+        const error: Error = {
+            error: ErrorID.AUTH_TOKEN_EXPIRED,
+            title: ErrorTitle.AUTH_TOKEN_EXPIRED,
+            status: StatusCode.UNAUTHORIZED,
+            detail: 'Authorization token is expired',
+            instance: instance
+        };
+        return error;
+    }
 }
