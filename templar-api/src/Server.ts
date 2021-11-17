@@ -14,6 +14,8 @@ export class Server {
         const userGetRouter = new UsersGetRouter();
 
         app.get(UsersRoutes.GET, userGetRouter.getRouter());
+        app.post(UsersRoutes.POST, userGetRouter.getRouter());
+        
         app.listen(port, callback);
     }
 }

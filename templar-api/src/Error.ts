@@ -1,3 +1,5 @@
+import { PrismaClientInitializationError, PrismaClientKnownRequestError, PrismaClientRustPanicError, PrismaClientUnknownRequestError, PrismaClientValidationError } from '@prisma/client/runtime';
+
 export interface Error {
     error: ErrorID;
     title: ErrorTitle;
@@ -7,23 +9,39 @@ export interface Error {
 }
 
 export enum ErrorID {
-    INVALID_ID_FIELD = 'invalid-id-parameter',
-    INVALID_NAME_FIELD = 'invalid-id-parameter',
-    INVALID_EMAIL_FIELD = 'invalid-id-parameter',
+    INVALID_PARAMTER = 'invalid-parameter',
+    MISSING_PARAMETER = 'missing-parameter',
 
     NO_AUTH_HEADER = 'missing-auth-header',
     INVALID_AUTH_HEADER = 'invalid-auth-header',
-    AUTH_TOKEN_EXPIRED = 'auth-token-expired'
+    AUTH_TOKEN_EXPIRED = 'auth-token-expired',
+
+    UNKNOWN_EXCEPTION_ERROR = 'unknown-exception-error',
+
+    // PRISMA
+    PRISMA_CLIENT_INITIALIZATION_ERROR = 'prisma-client-initialization-error',
+    PRISMA_CLIENT_KNOWN_REQUEST_ERROR = 'prisma-client-known-request-error',
+    PRISMA_CLIENT_RUST_PANIC_ERROR = 'prisma-client-rust-panic-error',
+    PRISMA_CLIENT_VALIDATION_ERROR = 'prisma-client-validation-error',
+    PRISMA_CLIENT_UNKNOWN_REQUEST_ERROR = 'prisma-client-unknown-request-error'
 }
 
 export enum ErrorTitle {
-    INVALID_ID_FIELD = 'Invalid \'id\' parameter',
-    INVALID_NAME_FIELD = 'Invalid \'name\' parameter',
-    INVALID_EMAIL_FIELD = 'Invalid \'email\' parameter',
+    INVALID_PARAMETER = 'Invalid parameter',
+    MISSING_PARAMETER = 'Missing parameter',
 
     NO_AUTH_HEADER = 'Mising auth header',
     INVALID_AUTH_HEADER = 'Invalid auth header',
-    AUTH_TOKEN_EXPIRED = 'Authorization token expired'
+    AUTH_TOKEN_EXPIRED = 'Authorization token expired',
+
+    UNKNOWN_EXCEPTION_ERROR = 'Unknown excepction error',
+
+    // Prisma
+    PRISMA_CLIENT_INITIALIZATION_ERROR = 'Prisma Client initialization error',
+    PRISMA_CLIENT_KNOWN_REQUEST_ERROR = 'Prisma Client known request error',
+    PRISMA_CLIENT_RUST_PANIC_ERROR = 'Prisma Client rust panic error',
+    PRISMA_CLIENT_VALIDATION_ERROR = 'Prisma Client validation error',
+    PRISMA_CLIENT_UNKNOWN_REQUEST_ERROR = 'Prisma Client unknown request error'
 }
 
 export enum StatusCode {
@@ -74,5 +92,99 @@ export class ErrorGenerator {
             instance: instance
         };
         return error;
+    }
+
+    public static missingParameter(param: string, instance: string): Error {
+        const error: Error = {
+            error: ErrorID.MISSING_PARAMETER,
+            title: ErrorTitle.MISSING_PARAMETER,
+            status: StatusCode.BAD_REQUEST,
+            detail: `Missing '${param}' parameter`,
+            instance: instance
+        };
+        return error;
+    }
+
+    public static invalidParameter(param: string, instance: string): Error {
+        const error: Error = {
+            error: ErrorID.INVALID_PARAMTER,
+            title: ErrorTitle.INVALID_PARAMETER,
+            status: StatusCode.BAD_REQUEST,
+            detail: `Invalid '${param}' parameter`,
+            instance: instance
+        };
+        return error;
+    }
+
+    public static unknownException(instance: string): Error {
+        const error: Error = {
+            error: ErrorID.UNKNOWN_EXCEPTION_ERROR,
+            title: ErrorTitle.UNKNOWN_EXCEPTION_ERROR,
+            status: StatusCode.INTERNAL_SERVER_ERROR,
+            detail: 'Unknown exception error',
+            instance: instance
+        };
+        return error;
+    }
+
+    public static prismaException(ex: unknown, instance: string): Error | null {
+        if (ex instanceof PrismaClientInitializationError) {
+            const error: Error = {
+                error: ErrorID.PRISMA_CLIENT_INITIALIZATION_ERROR,
+                title: ErrorTitle.PRISMA_CLIENT_INITIALIZATION_ERROR,
+                status: StatusCode.INTERNAL_SERVER_ERROR,
+                detail: `${ex.errorCode} ${ex.name}: ${ex.message}`,
+                instance: instance
+            };
+            return error;
+        }
+
+        if (ex instanceof PrismaClientKnownRequestError) {
+            const error: Error = {
+                error: ErrorID.PRISMA_CLIENT_KNOWN_REQUEST_ERROR,
+                title: ErrorTitle.PRISMA_CLIENT_KNOWN_REQUEST_ERROR,
+                status: StatusCode.CONFLICT,
+                detail: `${ex.code} ${ex.name}: ${ex.message}`,
+                instance: instance
+            };
+            return error;
+        }
+
+        if (ex instanceof PrismaClientRustPanicError) {
+            const error: Error = {
+                error: ErrorID.PRISMA_CLIENT_RUST_PANIC_ERROR,
+                title: ErrorTitle.PRISMA_CLIENT_RUST_PANIC_ERROR,
+                status: StatusCode.INTERNAL_SERVER_ERROR,
+                detail: `${ex.name}: ${ex.message}`,
+                instance: instance
+            };
+            return error;
+        }
+
+        if (ex instanceof PrismaClientValidationError) {
+            const index = ex.message.search('\n\nArgument flags:') + 2;
+            const message = ex.message.substring(index, ex.message.length - 2);
+            const error: Error = {
+                error: ErrorID.PRISMA_CLIENT_VALIDATION_ERROR,
+                title: ErrorTitle.PRISMA_CLIENT_VALIDATION_ERROR,
+                status: StatusCode.CONFLICT,
+                detail: `${ex.name}: ${message}`,
+                instance: instance
+            };
+            return error;
+        }
+
+        if (ex instanceof PrismaClientUnknownRequestError) {
+            const error: Error = {
+                error: ErrorID.PRISMA_CLIENT_UNKNOWN_REQUEST_ERROR,
+                title: ErrorTitle.PRISMA_CLIENT_UNKNOWN_REQUEST_ERROR,
+                status: 400,
+                detail: ex.message,
+                instance: instance
+            };
+            return error;
+        }
+
+        return null;
     }
 }

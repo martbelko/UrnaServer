@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { TokenManager } from './authorization/TokenManager';
 import dotenv from 'dotenv';
 
 import { Constants } from './Constants';
+import { TokenManager } from './authorization/TokenManager';
 import { Server } from './Server';
 
 dotenv.config();
