@@ -9,8 +9,15 @@ export interface Error {
 }
 
 export enum ErrorID {
-    INVALID_PARAMTER = 'invalid-parameter',
-    MISSING_PARAMETER = 'missing-parameter',
+    FORBIDDEN = 'forbidden',
+
+    MISSING_BODY_PARAMETER = 'missing-body-parameter',
+    MISSING_URL_PARAMETER = 'missing-url-parameter',
+    MISSING_QUERY_PARAMETER = 'missing-query-parameter',
+
+    INVALID_BODY_PARAMETER = 'invalid-body-parameter',
+    INVALID_URL_PARAMETER = 'invalid-url-parameter',
+    INVALID_QUERY_PARAMETER = 'invalid-query-parameter',
 
     NO_AUTH_HEADER = 'missing-auth-header',
     INVALID_AUTH_HEADER = 'invalid-auth-header',
@@ -27,8 +34,15 @@ export enum ErrorID {
 }
 
 export enum ErrorTitle {
-    INVALID_PARAMETER = 'Invalid parameter',
-    MISSING_PARAMETER = 'Missing parameter',
+    FORBIDDEN = 'Forbidden',
+
+    MISSING_BODY_PARAMETER = 'Missing body parameter',
+    MISSING_URL_PARAMETER = 'Missing URL parameter',
+    MISSING_QUERY_PARAMETER = 'Missing query parameter',
+
+    INVALID_BODY_PARAMETER = 'Invalid body parameter',
+    INVALID_URL_PARAMETER = 'Invalid URL parameter',
+    INVALID_QUERY_PARAMETER = 'Invalid query parameter',
 
     NO_AUTH_HEADER = 'Mising auth header',
     INVALID_AUTH_HEADER = 'Invalid auth header',
@@ -61,6 +75,17 @@ export enum StatusCode {
 }
 
 export class ErrorGenerator {
+    public static forbidden(instance: string): Error {
+        const error: Error = {
+            error: ErrorID.FORBIDDEN,
+            title: ErrorTitle.FORBIDDEN,
+            status: StatusCode.FORBIDDEN,
+            detail: 'Requested resource was forbidden',
+            instance: instance
+        };
+        return error;
+    }
+
     public static missingAuthHeader(instance: string): Error {
         const error: Error = {
             error: ErrorID.NO_AUTH_HEADER,
@@ -94,10 +119,10 @@ export class ErrorGenerator {
         return error;
     }
 
-    public static missingParameter(param: string, instance: string): Error {
+    public static missingBodyParameter(param: string, instance: string): Error {
         const error: Error = {
-            error: ErrorID.MISSING_PARAMETER,
-            title: ErrorTitle.MISSING_PARAMETER,
+            error: ErrorID.MISSING_BODY_PARAMETER,
+            title: ErrorTitle.MISSING_BODY_PARAMETER,
             status: StatusCode.BAD_REQUEST,
             detail: `Missing '${param}' parameter`,
             instance: instance
@@ -105,10 +130,54 @@ export class ErrorGenerator {
         return error;
     }
 
-    public static invalidParameter(param: string, instance: string): Error {
+    public static missingUrlParameter(param: string, instance: string): Error {
         const error: Error = {
-            error: ErrorID.INVALID_PARAMTER,
-            title: ErrorTitle.INVALID_PARAMETER,
+            error: ErrorID.MISSING_URL_PARAMETER,
+            title: ErrorTitle.MISSING_URL_PARAMETER,
+            status: StatusCode.BAD_REQUEST,
+            detail: `Missing '${param}' parameter`,
+            instance: instance
+        };
+        return error;
+    }
+
+    public static missingQueryParameter(param: string, instance: string): Error {
+        const error: Error = {
+            error: ErrorID.MISSING_QUERY_PARAMETER,
+            title: ErrorTitle.MISSING_QUERY_PARAMETER,
+            status: StatusCode.BAD_REQUEST,
+            detail: `Missing '${param}' parameter`,
+            instance: instance
+        };
+        return error;
+    }
+
+    public static invalidBodyParameter(param: string, instance: string): Error {
+        const error: Error = {
+            error: ErrorID.INVALID_BODY_PARAMETER,
+            title: ErrorTitle.INVALID_BODY_PARAMETER,
+            status: StatusCode.BAD_REQUEST,
+            detail: `Invalid '${param}' parameter`,
+            instance: instance
+        };
+        return error;
+    }
+
+    public static invalidUrlParameter(param: string, instance: string): Error {
+        const error: Error = {
+            error: ErrorID.INVALID_URL_PARAMETER,
+            title: ErrorTitle.INVALID_URL_PARAMETER,
+            status: StatusCode.BAD_REQUEST,
+            detail: `Invalid '${param}' parameter`,
+            instance: instance
+        };
+        return error;
+    }
+
+    public static invalidQueryParameter(param: string, instance: string): Error {
+        const error: Error = {
+            error: ErrorID.INVALID_QUERY_PARAMETER,
+            title: ErrorTitle.INVALID_QUERY_PARAMETER,
             status: StatusCode.BAD_REQUEST,
             detail: `Invalid '${param}' parameter`,
             instance: instance

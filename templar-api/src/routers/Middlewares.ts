@@ -23,6 +23,7 @@ export class Middlewares {
             return res.status(error.status).send(error);
         }
 
+        req.body.tokenPayload = accessTokenPayload;
         next();
     }
 }
