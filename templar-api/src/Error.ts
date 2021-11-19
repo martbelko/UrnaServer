@@ -1,4 +1,5 @@
-import { PrismaClientInitializationError, PrismaClientKnownRequestError, PrismaClientRustPanicError, PrismaClientUnknownRequestError, PrismaClientValidationError } from '@prisma/client/runtime';
+import { PrismaClientInitializationError, PrismaClientKnownRequestError, PrismaClientRustPanicError,
+    PrismaClientUnknownRequestError, PrismaClientValidationError } from '@prisma/client/runtime';
 
 export interface Error {
     error: ErrorID;

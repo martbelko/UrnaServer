@@ -1,5 +1,6 @@
-import { TokenManager } from './../authorization/TokenManager';
 import { NextFunction, Request, Response } from 'express';
+
+import { TokenManager } from './../authorization/TokenManager';
 import { Utils } from './../utils/Utils';
 import { ErrorGenerator } from './../Error';
 

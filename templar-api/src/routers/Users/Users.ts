@@ -1,14 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import express, { Request } from 'express';
 
-import { Middlewares } from './../../routers/Middlewares';
-import { Constants } from './../../Constants';
-import { ErrorGenerator, StatusCode } from './../../Error';
-import { PasswordManager } from './../../utils/PasswordManager';
-import { Utils } from './../../utils/Utils';
-import { UsersRoutes } from './../Users/UsersRoutes';
-import { AccessTokenPayload } from './../../authorization/TokenManager';
-import { EROFS } from 'constants';
+import { Middlewares } from '../Middlewares';
+import { ErrorGenerator, StatusCode } from '../../Error';
+import { PasswordManager } from '../../utils/PasswordManager';
+import { Utils } from '../../utils/Utils';
+import { UsersRoutes } from '../Routes';
+import { AccessTokenPayload } from '../../authorization/TokenManager';
 
 
 const prisma = new PrismaClient();
@@ -52,7 +50,7 @@ interface UserPatch {
     password: string | undefined;
 }
 
-export class UsersGetRouter {
+export class UsersRouter {
     public constructor() {
         this.mRouter.get(UsersRoutes.GET, async (req, res) => {
             const queryUser = new UserGet(req);
@@ -208,8 +206,8 @@ export class UsersGetRouter {
                     },
                     password: {
                         update: {
-                            password: Array.from(newPassword),
-                            salt: newSalt
+                            password: newPassword === undefined ? undefined : Array.from(newPassword),
+                            salt: newPassword === undefined ? undefined : newSalt
                         }
                     }
                 },
@@ -217,6 +215,19 @@ export class UsersGetRouter {
                     id: tokenPayload.userID
                 }
             });
+
+            return res.status(StatusCode.OK).send(updatedUser);
+        });
+
+        this.mRouter.delete(UsersRoutes.DELETE, Middlewares.validateAuthHeader, async (req, res) => {
+            const queryID = Number(req.params.id as string);
+            if (!Utils.isFiniteNumber(queryID)) {
+                const error = ErrorGenerator.invalidUrlParameter('id', req.originalUrl);
+                return res.status(error.status).send(error);
+            }
+
+            // TODO: Implement
+            throw new Error('Not implemented');
         });
     }
 

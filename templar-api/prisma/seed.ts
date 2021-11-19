@@ -62,7 +62,9 @@ async function main() {
         update: {},
         create: {
             immunity: 5,
-            flags: 3,
+            csFlags: 3,
+            webFlags: 3,
+            dcFlags: 3,
             steamID: 'CONSOLE',
             user: {
                 connect: {
@@ -79,7 +81,9 @@ async function main() {
         update: {},
         create: {
             immunity: 99,
-            flags: 16,
+            csFlags: 16,
+            webFlags: 16,
+            dcFlags: 16,
             steamID: 'STEAM_0:1:4515611',
             user: {
                 connect: {
