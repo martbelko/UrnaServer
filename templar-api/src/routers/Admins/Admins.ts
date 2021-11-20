@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { FlagsManager } from './../../AdminFlags';
 import express from 'express';
 
+import { FlagsManager } from './../../AdminFlags';
 import { StatusCode } from '../../Error';
 import { Utils } from '../../utils/Utils';
 import { AdminsRoutes } from '../Routes';
