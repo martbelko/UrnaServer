@@ -11,3 +11,7 @@ export enum AdminsRoutes {
     PATCH = '/api/admins/:id',
     DELETE = '/api/admins/:id'
 }
+
+export enum TokenRoutes {
+    POST = '/auth/token'
+}

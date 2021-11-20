@@ -1,0 +1,66 @@
+                  - privilégiá WEB: - na web-e mu ukáže vlákno, ak bude na jeho osobu vypísaná sťažnosť -> môže sa v ňom obhájiť;  
+(Panoš)             - privilégiá DISCORD: - !warn @meno "dôvod";
+                    - privilégiá SERVERY: - "možnosť rozprávať za živa aj bez VIP";
+                                    - privilégiá DISCORD: - 3 "room-ky" pre "HOSPITALLERS", Správa správ, 
+                                                            !clear "číslo" @meno -> "public chat & vip chat & galéria"
+                                                            !tempmute @meno "čas" "dôvod"
+                                                            !infractions @meno (vypíše priestupky hráča)
+                                                            !setnick @meno "nové meno";
+                                    - privilégiá SERVERY: - Kill Player, Change Player Name, 
+                                                            Silence + CT-Ban + Jailbreak Ban  (Max. 1 mesiac); 
+                                      - privilégiá WEB: - písať a robiť verdikt pri "Sťažnostiach na Hráčov", 
+                                                        - písať pri "Sťažnostiach na Podporu", 
+                                                        - možnosť dávať "SILENCE/CT-BAN/JAILBREAK BAN" cez Banlist (max. 1 mesiac)
+Templar Knight - [Templar]: - privilégiá DISCORD: - Presunúť uživateľa, Přednostní mluvčí, "Room-ky" pre Templárov;
+                            - privilégiá SERVERY: - UltraVIP
+                                                  - "Neviditeľný Spectator" (-> na serveri neukazuje, keď sa admin napája a keď sa
+                                                                                po napojení napojí do "Spectator-ov", tak bude 
+                                                                                stále neviditeľný; ukáže, že sa napojil, až keď
+                                                                                sa napojil do nejakého tímu -> to isté platí aj,
+                                                                                keď sa z nejakého tímu chce dať do "Spectate-ov",
+                                                                                napíše, že sa admin "akože" odpojil zo serveru);
+                            - privilégiá WEB: - písať pri "Sťažnostiach na Člena Rádu",
+                                              - písať pri "Nábore"
+                              - privilégia DISCORD: - Zobrazit Audit Log; Zmiňovat @everyone; @here a všechny role;
+                              - privilégiá SERVERY: - Kick Player, Slap Player (0 HP), 
+                              - privilégiá WEB: - robiť finálny verdikt pri "Sťažnostiach na Podporu", pri zhodnocovaní 
+                                                  sťažnosti pozrieť aj prípadné sťažnosti na člena Podpory z minulosti,
+                                                  (napokon rozpíše závažnosť situácie, popr. stanoví patričný trest)
+                               - privilégiá DISCORD: - Vypnout členúm  mikrofon; Vypnout členúm zvuk; Vkládat odkazy;
+                               - privilégiá SERVERY: - Beacon/Tag Player, Restart Round (len, keď sa bugne mapa)
+                               - privilégiá WEB: - meniť STEAM ID & Discord VIP-čkam, 
+                                                 - možnosť dávať manuálne "unmute" (v prípade pochybenia admina 
+                                                                                    pri udelení trestu); 
+                                                   -> ak je trest chybný, vymaže "mute"; 
+                                                   -> ak je trest príliš prísny/mierny -> upraví v "Banlist-e" adekvátnu dĺžku;
+Marshal - [Marshal]: - privilégiá DISCORD: - Správa háčkú webhook;
+                     - privilégiá SERVERY: *SuperVIP*
+(Nekvo)              - priviégiá WEB: - meniť informácie o adminovi (ak si chce zmeniť STEAM ID/Discord 
+                                                                     -> musí si zachovať MENO a uviesť Dôvod)
+                                      - pridávať Novinky & Návody
+(Pampalini) *Leader*           - privilégiá SERVERY: - "Grab", "Noclip", "!opendoors" & ostatné veci 
+                               - privilégiá WEB: - meniť hodnosti členov rádu/podpory
+                                                 - robiť finálny verdikt pri "Sťažnostiach na Člena Rádu" 
+                                                                       & pri "Nábore"
+                                                 - upravovať a pridávať pravidlá
+
+FORUM - Písať môžu *LEN* PRIHLÁSENÍ a vidieť si môžu len svoje vlastné "vlákna", ktoré poslali;
+              - keď pošle sťažnosť, môže dodávať komentáre
+              -> na výber členovia rádu/podpora, ktorého sa sťažnosť týka 
+                                                           (v kolonke - podľa databázy);
+              - keď pošle žiadosť do náboru, NEmôže dodávať komentáre;
+              - keď napíše hráč žiadosť do náboru -> ďalšiu žiadosť si nemôže napísať 1 mesiac 
+                (pred odoslaním žiadosti ho to upozorní, že po neschválenej žiadosti si ju môže znova napísať až o mesiac);
+              - po schválenej písomnej žiadosti môže prísť aj k ústnemu pohovoru - na "Discord-e";
+              - pri "Sťažnosti na Podporu" či "Sťažnosti na Člena Rádu" (v rámci "Hospitallers") dojde konkrétnemu členovi 
+                správa na "web" o prebiehajúcej sťažnosti, môže do vlákna písať, obhájiť sa
+                (upozornenie o sťažnosti mu príde aj do správy na "Discord-e") - po finálnom verdikte mu tiež príde správa
+                na "Web" & "Discord";
+              - budú v rámci sťažností a náborových žiadostí kolonky (STEAM ID, Dôkaz - *Priložiť súbor*, ..), 
+                ktoré musia byť vyplnené pred odoslaním sťažnosti či žiadosti 
+                (v rámci obsahu "Dôvodu" tiež zapnúť bota, ktorý cenzuruje neslušné slová a nadávky);
+
+Banlist - Verejné (pri banliste budú mať admini na výber presné dôvody - aj v CSGO -> nebudú vypisovať)
+        - tak isto budú predom vypísané časy (aj na serveroch) 
+          -> pri Silence/Jailbreak ban: 1 mesiac, 1 týždeň, 2 dni, 1 deň, 12 hod, 6 hod, 2 hod, 30 min
+          -> pri CT-Ban: 1 týždeň, 2 dni, 1 deň, 12 hod, 6 hod, 2 hod, 30 min

@@ -40,7 +40,8 @@ export enum WebFlag {
     ADD_NEW_CONTENT = bit(14),
     MODIFY_ADMIN_FLAGS = bit(15),
     MAKE_FINAL_VERDICT_OF_RECRUITMENT = bit(16),
-    MODIFY_RULES = bit(17)
+    MODIFY_RULES = bit(17),
+    ADD_NEW_ADMIN = bit(18)
 }
 
 export enum DiscordFlag {

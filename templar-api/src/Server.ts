@@ -22,6 +22,7 @@ export class Server {
         app.delete(UsersRoutes.DELETE, userGetRouter.getRouter());
 
         app.get(AdminsRoutes.GET, adminsRouter.getRouter());
+        app.post(AdminsRoutes.POST, adminsRouter.getRouter());
 
         app.listen(port, callback);
     }

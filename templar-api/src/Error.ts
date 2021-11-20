@@ -12,6 +12,8 @@ export interface Error {
 export enum ErrorID {
     FORBIDDEN = 'forbidden',
 
+    INVALID_REFRESH_TOKEN = 'invalid-refresh-token',
+
     MISSING_BODY_PARAMETER = 'missing-body-parameter',
     MISSING_URL_PARAMETER = 'missing-url-parameter',
     MISSING_QUERY_PARAMETER = 'missing-query-parameter',
@@ -36,6 +38,8 @@ export enum ErrorID {
 
 export enum ErrorTitle {
     FORBIDDEN = 'Forbidden',
+
+    INVALID_REFRESH_TOKEN = 'Invalid refresh token',
 
     MISSING_BODY_PARAMETER = 'Missing body parameter',
     MISSING_URL_PARAMETER = 'Missing URL parameter',
@@ -82,6 +86,17 @@ export class ErrorGenerator {
             title: ErrorTitle.FORBIDDEN,
             status: StatusCode.FORBIDDEN,
             detail: 'Requested resource was forbidden',
+            instance: instance
+        };
+        return error;
+    }
+
+    public static invalidRefreshToken(instance: string): Error {
+        const error: Error = {
+            error: ErrorID.INVALID_REFRESH_TOKEN,
+            title: ErrorTitle.INVALID_REFRESH_TOKEN,
+            status: StatusCode.FORBIDDEN,
+            detail: 'Refresh token is invalid',
             instance: instance
         };
         return error;
