@@ -1,15 +1,11 @@
 -- CreateEnum
-CREATE TYPE "BanType" AS ENUM ('NORMAL', 'CT', 'GAG', 'MUTE');
-
--- CreateEnum
-CREATE TYPE "VipMode" AS ENUM ('CLASSIC', 'EXTRA');
+CREATE TYPE "VipMode" AS ENUM ('NORMAL', 'EXTRA');
 
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "emailID" INTEGER NOT NULL,
-    "passwordID" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -28,19 +24,10 @@ CREATE TABLE "RefreshToken" (
 );
 
 -- CreateTable
-CREATE TABLE "VerifiedEmail" (
+CREATE TABLE "Email" (
     "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
     "verified" BOOLEAN NOT NULL DEFAULT false,
-
-    PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Password" (
-    "id" SERIAL NOT NULL,
-    "password" INTEGER[],
-    "salt" TEXT NOT NULL,
 
     PRIMARY KEY ("id")
 );
@@ -58,7 +45,9 @@ CREATE TABLE "Server" (
 CREATE TABLE "Admin" (
     "id" SERIAL NOT NULL,
     "steamID" VARCHAR(32) NOT NULL,
-    "flags" INTEGER NOT NULL,
+    "csFlags" INTEGER NOT NULL,
+    "webFlags" INTEGER NOT NULL,
+    "dcFlags" INTEGER NOT NULL,
     "immunity" INTEGER NOT NULL,
     "userID" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -68,7 +57,7 @@ CREATE TABLE "Admin" (
 );
 
 -- CreateTable
-CREATE TABLE "PlayerInfo" (
+CREATE TABLE "BanInfo" (
     "id" SERIAL NOT NULL,
     "name" VARCHAR(128) NOT NULL,
     "steam2ID" VARCHAR(32) NOT NULL,
@@ -83,11 +72,11 @@ CREATE TABLE "PlayerInfo" (
 CREATE TABLE "Ban" (
     "id" SERIAL NOT NULL,
     "adminID" INTEGER NOT NULL,
-    "targetInfoID" INTEGER NOT NULL,
+    "banInfoID" INTEGER NOT NULL,
     "unbanID" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "reason" TEXT NOT NULL,
-    "type" "BanType" NOT NULL,
+    "type" INTEGER NOT NULL,
     "length" INTEGER NOT NULL,
     "serverID" INTEGER,
 
@@ -122,13 +111,10 @@ CREATE UNIQUE INDEX "User.name_unique" ON "User"("name");
 CREATE UNIQUE INDEX "User.emailID_unique" ON "User"("emailID");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User.passwordID_unique" ON "User"("passwordID");
-
--- CreateIndex
 CREATE UNIQUE INDEX "RefreshToken.token_unique" ON "RefreshToken"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "VerifiedEmail.email_unique" ON "VerifiedEmail"("email");
+CREATE UNIQUE INDEX "Email.email_unique" ON "Email"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Server.ip_unique" ON "Server"("ip");
@@ -140,7 +126,7 @@ CREATE UNIQUE INDEX "Admin.steamID_unique" ON "Admin"("steamID");
 CREATE UNIQUE INDEX "Admin.userID_unique" ON "Admin"("userID");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Ban.targetInfoID_unique" ON "Ban"("targetInfoID");
+CREATE UNIQUE INDEX "Ban.banInfoID_unique" ON "Ban"("banInfoID");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Ban.unbanID_unique" ON "Ban"("unbanID");
@@ -149,10 +135,7 @@ CREATE UNIQUE INDEX "Ban.unbanID_unique" ON "Ban"("unbanID");
 CREATE UNIQUE INDEX "Unban.banID_unique" ON "Unban"("banID");
 
 -- AddForeignKey
-ALTER TABLE "User" ADD FOREIGN KEY ("passwordID") REFERENCES "Password"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "User" ADD FOREIGN KEY ("emailID") REFERENCES "VerifiedEmail"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "User" ADD FOREIGN KEY ("emailID") REFERENCES "Email"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "RefreshToken" ADD FOREIGN KEY ("userID") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -161,7 +144,7 @@ ALTER TABLE "RefreshToken" ADD FOREIGN KEY ("userID") REFERENCES "User"("id") ON
 ALTER TABLE "Admin" ADD FOREIGN KEY ("userID") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Ban" ADD FOREIGN KEY ("targetInfoID") REFERENCES "PlayerInfo"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Ban" ADD FOREIGN KEY ("banInfoID") REFERENCES "BanInfo"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Ban" ADD FOREIGN KEY ("adminID") REFERENCES "Admin"("id") ON DELETE CASCADE ON UPDATE CASCADE;

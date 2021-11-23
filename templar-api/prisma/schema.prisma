@@ -11,15 +11,13 @@ generator client {
 }
 
 model User {
-  id         Int    @id @default(autoincrement())
-  name       String @unique
-  emailID    Int    @unique
-  passwordID Int    @unique
+  id      Int    @id @default(autoincrement())
+  name    String @unique
+  emailID Int    @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  password      Password       @relation(fields: [passwordID], references: [id])
   email         Email          @relation(fields: [emailID], references: [id])
   refreshTokens RefreshToken[]
 
@@ -45,14 +43,6 @@ model Email {
   User User?
 }
 
-model Password {
-  id       Int    @id @default(autoincrement())
-  password Int[]
-  salt     String
-
-  users User?
-}
-
 model Server {
   id   Int    @id @default(autoincrement())
   ip   String @unique
@@ -64,9 +54,9 @@ model Server {
 model Admin {
   id       Int    @id @default(autoincrement())
   steamID  String @unique @db.VarChar(32)
-  csFlags  Int
-  webFlags Int
-  dcFlags  Int
+  csFlags  Int // ORed value
+  webFlags Int // ORed value
+  dcFlags  Int // ORed value
   immunity Int
   userID   Int    @unique
 
@@ -79,7 +69,7 @@ model Admin {
   unbans Unban[]
 }
 
-model PlayerInfo {
+model BanInfo {
   id        Int    @id @default(autoincrement())
   name      String @db.VarChar(128)
   steam2ID  String @db.VarChar(32)
@@ -93,23 +83,23 @@ model PlayerInfo {
 model Ban {
   id Int @id @default(autoincrement())
 
-  adminID      Int
-  targetInfoID Int @unique
+  adminID   Int
+  banInfoID Int @unique
 
   unbanID Int? @unique
 
   createdAt DateTime @default(now())
 
   reason String
-  type   BanType
+  type   Int // ORed value
   length Int // In minutes, 0 for permanent
 
   serverID Int?
 
-  targetInfo PlayerInfo @relation(fields: [targetInfoID], references: [id]) // Info about the target client
-  admin      Admin      @relation(fields: [adminID], references: [id])
+  targetInfo BanInfo @relation(fields: [banInfoID], references: [id]) // Info about the target client
+  admin      Admin   @relation(fields: [adminID], references: [id])
   unban      Unban?
-  server     Server?    @relation(fields: [serverID], references: [id])
+  server     Server? @relation(fields: [serverID], references: [id])
 }
 
 model Unban {
@@ -133,14 +123,7 @@ model Vip {
   buyer User @relation(fields: [userid], references: [id])
 }
 
-enum BanType {
-  NORMAL
-  CT
-  GAG
-  MUTE
-}
-
 enum VipMode {
-  CLASSIC
+  NORMAL
   EXTRA
 }

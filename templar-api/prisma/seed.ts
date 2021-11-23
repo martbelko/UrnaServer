@@ -1,17 +1,16 @@
-import { BanType, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import express from 'express';
-import bodyParser from 'body-parser';
 import cors from 'cors';
 
 const prisma = new PrismaClient();
 
 const app = express();
 
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors());
 
 async function main() {
-    const consoleUser = await prisma.user.upsert({
+    await prisma.user.upsert({
         where: {
             id: 1
         },
@@ -23,17 +22,11 @@ async function main() {
                     email: 'martbelko@gmail.com',
                     verified: true
                 }
-            },
-            password: {
-                create: {
-                    password: 0,
-                    salt: 'a'
-                }
             }
         }
     });
 
-    const meUser = await prisma.user.upsert({
+    await prisma.user.upsert({
         where: {
             id: 2
         },
@@ -44,12 +37,6 @@ async function main() {
                 create: {
                     email: 'matik.b@centrum.com',
                     verified: true
-                }
-            },
-            password: {
-                create: {
-                    password: 1,
-                    salt: 'b'
                 }
             }
         }
@@ -93,7 +80,7 @@ async function main() {
         }
     });
 
-    const info1 = await prisma.playerInfo.upsert({
+    const info1 = await prisma.banInfo.upsert({
         where: {
             id: 1
         },
@@ -109,21 +96,21 @@ async function main() {
         }
     });
 
-    const ban1 = await prisma.ban.upsert({
+    await prisma.ban.upsert({
         where: {
             id: 1
         },
         update: {},
         create: {
-            type: BanType.NORMAL,
+            type: 0,
             length: 60,
             adminID: adminConsole.id,
-            targetInfoID: info1.id,
+            banInfoID: info1.id,
             reason: 'Reason for ban2'
         }
     });
 
-    const info2 = await prisma.playerInfo.upsert({
+    const info2 = await prisma.banInfo.upsert({
         where: {
             id: 2
         },
@@ -137,16 +124,16 @@ async function main() {
         }
     });
 
-    const ban2 = await prisma.ban.upsert({
+    await prisma.ban.upsert({
         where: {
             id: 2
         },
         update: {},
         create: {
-            type: BanType.CT,
+            type: 1,
             length: 1200,
             adminID: adminMe.id,
-            targetInfoID: info2.id,
+            banInfoID: info2.id,
             reason: 'This is reason for ban2'
         }
     });
