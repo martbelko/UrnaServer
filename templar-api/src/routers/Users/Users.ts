@@ -3,7 +3,6 @@ import express, { Request } from 'express';
 
 import { Middlewares } from '../Middlewares';
 import { ErrorGenerator, StatusCode } from '../../Error';
-import { PasswordManager } from '../../utils/PasswordManager';
 import { Utils } from '../../utils/Utils';
 import { UsersRoutes } from '../Routes';
 import { AccessTokenPayload } from '../../authorization/TokenManager';
@@ -98,7 +97,6 @@ export class UsersRouter {
                 return res.status(error.status).send(error);
             }
 
-            const { hashedPassword, salt } = PasswordManager.hashPassword(queryUser.password);
             try {
                 const createdUser = await prisma.user.create({
                     data: {
@@ -107,12 +105,6 @@ export class UsersRouter {
                             create: {
                                 email: queryUser.email,
                                 verified: false
-                            }
-                        },
-                        password: {
-                            create: {
-                                password: Array.from(hashedPassword),
-                                salt: salt
                             }
                         }
                     }
@@ -163,8 +155,6 @@ export class UsersRouter {
 
             let newName: string | undefined = undefined;
             let newEmail: string | undefined = undefined;
-            let newPassword: Uint8Array | undefined = undefined;
-            let newSalt: string | undefined = undefined;
 
             if (queryUser.name !== undefined) {
                 if (Utils.validateUserName(queryUser.name) !== null) {
@@ -189,10 +179,6 @@ export class UsersRouter {
                     const error = ErrorGenerator.invalidBodyParameter('password', req.originalUrl);
                     return res.status(error.status).send(error);
                 }
-
-                const { hashedPassword, salt } = PasswordManager.hashPassword(queryUser.password as string);
-                newPassword = hashedPassword;
-                newSalt = salt;
             }
 
             const updatedUser = prisma.user.update({
@@ -202,12 +188,6 @@ export class UsersRouter {
                         update: {
                             email: newEmail,
                             verified: newEmail === undefined
-                        }
-                    },
-                    password: {
-                        update: {
-                            password: newPassword === undefined ? undefined : Array.from(newPassword),
-                            salt: newPassword === undefined ? undefined : newSalt
                         }
                     }
                 },
