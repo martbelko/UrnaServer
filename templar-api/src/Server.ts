@@ -35,8 +35,6 @@ export class Server {
         app.get(AdminsRoutes.GET, adminsRouter.getRouter());
         app.post(AdminsRoutes.POST, adminsRouter.getRouter());
 
-        const steam = new SteamAPI(steamApiKey);
-
         // Required to get data from user for sessions
         passport.serializeUser((user, done) => {
             done(null, user);
@@ -49,8 +47,8 @@ export class Server {
             returnURL: 'http://localhost:' + port + '/api/auth/steam/return',
             realm: 'http://localhost:' + port + '/',
             apiKey: steamApiKey
-        }, function (identifier: any, profile: { identifier: any; }, done: (arg0: null, arg1: any) => any) {
-            process.nextTick(async function () {
+        }, function (identifier: string, profile: { identifier: string; _json: { steamid: string } }, done: (arg0: null, arg1: unknown) => unknown) {
+            process.nextTick(function () {
                 profile.identifier = identifier;
                 console.log(profile);
                 return done(null, profile);
