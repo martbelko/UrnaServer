@@ -22,7 +22,7 @@ export class TokenRouter {
 
             // Should not happen, but check anyway
             if (refreshTokenPayload.userID === undefined || Utils.isFiniteNumber(refreshTokenPayload.userID) ||
-                refreshTokenPayload.createdAt === undefined) {
+                refreshTokenPayload.userCreatedAt === undefined) {
                 const error = ErrorGenerator.invalidRefreshToken(req.originalUrl);
                 return res.status(error.status).send(error);
             }

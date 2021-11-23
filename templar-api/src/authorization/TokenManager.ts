@@ -6,13 +6,13 @@ dotenv.config();
 
 export interface AccessTokenPayload {
     userID: number;
-    createdAt: Date;
+    userCreatedAt: Date;
     refreshTokenID: number;
 }
 
 export interface RefreshTokenPayload {
     userID: number;
-    createdAt: Date;
+    userCreatedAt: Date;
 }
 
 export class TokenManager {
