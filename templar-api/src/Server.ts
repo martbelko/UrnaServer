@@ -1,18 +1,25 @@
 import cors from 'cors';
 import express from 'express';
+import dotenv from 'dotenv';
 import passport from 'passport';
 import passportSteam from 'passport-steam';
+import SteamAPI from 'steamapi';
 
 import { UsersRouter } from './routers/Users/Users';
 import { AdminsRoutes, UsersRoutes } from './routers/Routes';
 import { AdminsRouter } from './routers/Admins/Admins';
 
+dotenv.config();
 const app = express();
 
-import SteamAPI from 'steamapi';
+const steamApiKey = process.env.STEAM_API_KEY;
 
 export class Server {
     public static listen(port: number, callback?: (() => void)): void {
+        if (steamApiKey === undefined){
+            throw new Error('env.STEAM_API_KEY is undefined');
+        }
+
         app.use(express.json());
         app.use(cors());
         app.enable('trust proxy');
@@ -28,7 +35,7 @@ export class Server {
         app.get(AdminsRoutes.GET, adminsRouter.getRouter());
         app.post(AdminsRoutes.POST, adminsRouter.getRouter());
 
-        const steam = new SteamAPI('');
+        const steam = new SteamAPI(steamApiKey);
 
         // Required to get data from user for sessions
         passport.serializeUser((user, done) => {
@@ -41,17 +48,11 @@ export class Server {
         passport.use(new passportSteam.Strategy({
             returnURL: 'http://localhost:' + port + '/api/auth/steam/return',
             realm: 'http://localhost:' + port + '/',
-            apiKey: ''
+            apiKey: steamApiKey
         }, function (identifier: any, profile: { identifier: any; }, done: (arg0: null, arg1: any) => any) {
             process.nextTick(async function () {
                 profile.identifier = identifier;
-                const steamid = (profile as any)._json.steamid;
-                console.log(steamid);
-                const friends = await steam.getUserFriends(steamid);
-                for (const friend of friends) {
-                    const friendInfo = await steam.getUserSummary(friend.steamID);
-                    console.log(friendInfo.nickname);
-                }
+                console.log(profile);
                 return done(null, profile);
             });
         }
