@@ -12,13 +12,13 @@ generator client {
 
 model User {
   id      Int    @id @default(autoincrement())
-  name    String @unique
-  emailID Int    @unique
+  steamID String @unique
+  emailID Int?   @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email         Email          @relation(fields: [emailID], references: [id])
+  email         Email?         @relation(fields: [emailID], references: [id])
   refreshTokens RefreshToken[]
 
   admin Admin?
@@ -29,7 +29,7 @@ model RefreshToken {
   id        Int      @id @default(autoincrement())
   token     String   @unique
   createdAt DateTime @default(now())
-  expiresIn Int // in seconds
+  expiresIn Int // Seconds
   userID    Int
 
   user User @relation(fields: [userID], references: [id])
@@ -40,25 +40,28 @@ model Email {
   email    String  @unique
   verified Boolean @default(false)
 
-  User User?
+  user User?
 }
 
 model Server {
-  id   Int    @id @default(autoincrement())
-  ip   String @unique
-  name String
+  id         Int        @id @default(autoincrement())
+  ip         String     @unique
+  name       String     @unique
+  serverType ServerType
 
   bans Ban[]
 }
 
 model Admin {
   id       Int    @id @default(autoincrement())
-  steamID  String @unique @db.VarChar(32)
+  nickname String @unique @db.VarChar(32)
+
   csFlags  Int // ORed value
   webFlags Int // ORed value
   dcFlags  Int // ORed value
   immunity Int
-  userID   Int    @unique
+
+  userID Int @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -96,10 +99,10 @@ model Ban {
 
   serverID Int?
 
-  targetInfo BanInfo @relation(fields: [banInfoID], references: [id]) // Info about the target client
-  admin      Admin   @relation(fields: [adminID], references: [id])
-  unban      Unban?
-  server     Server? @relation(fields: [serverID], references: [id])
+  banInfo BanInfo @relation(fields: [banInfoID], references: [id]) // Info about the target client
+  admin   Admin   @relation(fields: [adminID], references: [id])
+  unban   Unban?
+  server  Server? @relation(fields: [serverID], references: [id])
 }
 
 model Unban {
@@ -116,14 +119,19 @@ model Unban {
 
 model Vip {
   id      Int     @id @default(autoincrement())
-  userid  Int
-  steamid String  @db.VarChar(32)
+  userID  Int
   vipMode VipMode
 
-  buyer User @relation(fields: [userid], references: [id])
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userID], references: [id])
 }
 
 enum VipMode {
   NORMAL
   EXTRA
+}
+
+enum ServerType {
+  JAILBREAK
 }

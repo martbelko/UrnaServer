@@ -1,13 +1,12 @@
 import express from 'express';
 
 import { ErrorGenerator } from '../../Error';
-import { Utils } from '../../utils/Utils';
-import { TokenRoutes } from '../Routes';
-import { TokenManager } from './../../authorization/TokenManager';
+import { AuthRoutes } from '../Routes';
+import { TokenManager } from '../../authorization/TokenManager';
 
 export class TokenRouter {
     public constructor() {
-        this.mRouter.post(TokenRoutes.POST, async (req, res) => {
+        this.mRouter.post(AuthRoutes.TOKEN_POST, async (req, res) => {
             const refreshToken = req.body.refreshToken as string;
             if (refreshToken === undefined) {
                 const error = ErrorGenerator.missingBodyParameter('refreshToken', req.originalUrl);
@@ -20,17 +19,18 @@ export class TokenRouter {
                 return res.status(error.status).send(error);
             }
 
+
+            // TODO: Implement
+            throw new Error('Not implemented');
+
             // Should not happen, but check anyway
-            if (refreshTokenPayload.userID === undefined || Utils.isFiniteNumber(refreshTokenPayload.userID) ||
+            /*if (refreshTokenPayload.userID === undefined || Utils.isFiniteNumber(refreshTokenPayload.userID) ||
                 refreshTokenPayload.userCreatedAt === undefined) {
                 const error = ErrorGenerator.invalidRefreshToken(req.originalUrl);
                 return res.status(error.status).send(error);
             }
 
-            // TODO: Implement
-            throw new Error('Not implemented');
-
-            /*const refreshTokenDB = await prisma.refreshToken.findFirst({
+            const refreshTokenDB = await prisma.refreshToken.findFirst({
                 where: {
                     userID: refreshTokenPayload.userID,
                     userCreatedAt: refreshTokenPayload.createdAt

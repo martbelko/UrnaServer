@@ -16,6 +16,7 @@ async function main() {
         update: {},
         create: {
             name: 'CONSOLE',
+            steamID: 'CONSOLE',
             email: {
                 create: {
                     email: 'martbelko@gmail.com',
@@ -32,6 +33,7 @@ async function main() {
         update: {},
         create: {
             name: 'elektro',
+            steamID: '76561199008632307',
             email: {
                 create: {
                     email: 'matik.b@centrum.com',

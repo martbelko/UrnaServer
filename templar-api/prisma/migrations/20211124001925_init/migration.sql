@@ -5,11 +5,12 @@ CREATE TYPE "VipMode" AS ENUM ('NORMAL', 'EXTRA');
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "emailID" INTEGER NOT NULL,
+    "steamID" TEXT NOT NULL,
+    "emailID" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -20,7 +21,7 @@ CREATE TABLE "RefreshToken" (
     "expiresIn" INTEGER NOT NULL,
     "userID" INTEGER NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "RefreshToken_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -29,7 +30,7 @@ CREATE TABLE "Email" (
     "email" TEXT NOT NULL,
     "verified" BOOLEAN NOT NULL DEFAULT false,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "Email_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -38,13 +39,12 @@ CREATE TABLE "Server" (
     "ip" TEXT NOT NULL,
     "name" TEXT NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "Server_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Admin" (
     "id" SERIAL NOT NULL,
-    "steamID" VARCHAR(32) NOT NULL,
     "csFlags" INTEGER NOT NULL,
     "webFlags" INTEGER NOT NULL,
     "dcFlags" INTEGER NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE "Admin" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "Admin_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -65,7 +65,7 @@ CREATE TABLE "BanInfo" (
     "steamID64" VARCHAR(32) NOT NULL,
     "ip" VARCHAR(32) NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "BanInfo_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -80,7 +80,7 @@ CREATE TABLE "Ban" (
     "length" INTEGER NOT NULL,
     "serverID" INTEGER,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "Ban_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -91,7 +91,7 @@ CREATE TABLE "Unban" (
     "banID" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "Unban_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -101,62 +101,62 @@ CREATE TABLE "Vip" (
     "steamid" VARCHAR(32) NOT NULL,
     "vipMode" "VipMode" NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "Vip_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User.name_unique" ON "User"("name");
+CREATE UNIQUE INDEX "User_name_key" ON "User"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User.emailID_unique" ON "User"("emailID");
+CREATE UNIQUE INDEX "User_steamID_key" ON "User"("steamID");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "RefreshToken.token_unique" ON "RefreshToken"("token");
+CREATE UNIQUE INDEX "User_emailID_key" ON "User"("emailID");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Email.email_unique" ON "Email"("email");
+CREATE UNIQUE INDEX "RefreshToken_token_key" ON "RefreshToken"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Server.ip_unique" ON "Server"("ip");
+CREATE UNIQUE INDEX "Email_email_key" ON "Email"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Admin.steamID_unique" ON "Admin"("steamID");
+CREATE UNIQUE INDEX "Server_ip_key" ON "Server"("ip");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Admin.userID_unique" ON "Admin"("userID");
+CREATE UNIQUE INDEX "Admin_userID_key" ON "Admin"("userID");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Ban.banInfoID_unique" ON "Ban"("banInfoID");
+CREATE UNIQUE INDEX "Ban_banInfoID_key" ON "Ban"("banInfoID");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Ban.unbanID_unique" ON "Ban"("unbanID");
+CREATE UNIQUE INDEX "Ban_unbanID_key" ON "Ban"("unbanID");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Unban.banID_unique" ON "Unban"("banID");
+CREATE UNIQUE INDEX "Unban_banID_key" ON "Unban"("banID");
 
 -- AddForeignKey
-ALTER TABLE "User" ADD FOREIGN KEY ("emailID") REFERENCES "Email"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_emailID_fkey" FOREIGN KEY ("emailID") REFERENCES "Email"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RefreshToken" ADD FOREIGN KEY ("userID") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "RefreshToken" ADD CONSTRAINT "RefreshToken_userID_fkey" FOREIGN KEY ("userID") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Admin" ADD FOREIGN KEY ("userID") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Admin" ADD CONSTRAINT "Admin_userID_fkey" FOREIGN KEY ("userID") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Ban" ADD FOREIGN KEY ("banInfoID") REFERENCES "BanInfo"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Ban" ADD CONSTRAINT "Ban_banInfoID_fkey" FOREIGN KEY ("banInfoID") REFERENCES "BanInfo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Ban" ADD FOREIGN KEY ("adminID") REFERENCES "Admin"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Ban" ADD CONSTRAINT "Ban_adminID_fkey" FOREIGN KEY ("adminID") REFERENCES "Admin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Ban" ADD FOREIGN KEY ("serverID") REFERENCES "Server"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Ban" ADD CONSTRAINT "Ban_serverID_fkey" FOREIGN KEY ("serverID") REFERENCES "Server"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Unban" ADD FOREIGN KEY ("adminID") REFERENCES "Admin"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Unban" ADD CONSTRAINT "Unban_adminID_fkey" FOREIGN KEY ("adminID") REFERENCES "Admin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Unban" ADD FOREIGN KEY ("banID") REFERENCES "Ban"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Unban" ADD CONSTRAINT "Unban_banID_fkey" FOREIGN KEY ("banID") REFERENCES "Ban"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Vip" ADD FOREIGN KEY ("userid") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Vip" ADD CONSTRAINT "Vip_userid_fkey" FOREIGN KEY ("userid") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -5,7 +5,6 @@ import { Middlewares } from '../Middlewares';
 import { ErrorGenerator, StatusCode } from '../../Error';
 import { Utils } from '../../utils/Utils';
 import { UsersRoutes } from '../Routes';
-import { AccessTokenPayload } from '../../authorization/TokenManager';
 
 
 const prisma = new PrismaClient();
@@ -14,39 +13,18 @@ class UserGet {
     public constructor(req: Request) {
         this.id = Number(req.query.id as string | undefined);
         this.name = req.query.name as string | undefined;
-        this.email = req.query.email as string | undefined;
+        this.steamID = req.query.steamID as string | undefined;
     }
 
     public readonly id: number;
     public readonly name: string | undefined;
-    public readonly email: string | undefined;
-}
-
-class UserPost {
-    public static async fromRequest(req: Request): Promise<UserPost> {
-        const body = await req.body;
-        return new UserPost(body);
-    }
-
-    public readonly name: string | undefined;
-    public readonly email: string | undefined;
-    public readonly password: string | undefined;
-
-    // We can disable eslint for here, because body parameter will be
-    // the actual body of the request
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private constructor(body: any) {
-        this.name = body.name;
-        this.email = body.email;
-        this.password = body.password;
-    }
+    public readonly steamID: string | undefined;
 }
 
 interface UserPatch {
     id: number;
     name: string | undefined;
     email: string | undefined;
-    password: string | undefined;
 }
 
 export class UsersRouter {
@@ -57,77 +35,18 @@ export class UsersRouter {
                 where: {
                     id: Utils.isFiniteNumber(queryUser.id) ? queryUser.id : undefined,
                     name: queryUser.name,
-                    email: {
-                        email: queryUser.email
-                    }
+                    steamID: queryUser.steamID
                 }
             });
 
             return res.status(StatusCode.OK).send(users);
         });
 
-        this.mRouter.post(UsersRoutes.POST, async (req, res) => {
-            const queryUser = await UserPost.fromRequest(req);
-            console.log(queryUser);
-            if (queryUser.name === undefined) {
-                const error = ErrorGenerator.missingBodyParameter('name', req.originalUrl);
-                return res.status(error.status).send(error);
-            }
-            if (queryUser.email === undefined) {
-                const error = ErrorGenerator.missingBodyParameter('email', req.originalUrl);
-                return res.status(error.status).send(error);
-            }
-            if (queryUser.password === undefined) {
-                const error = ErrorGenerator.missingBodyParameter('password', req.originalUrl);
-                return res.status(error.status).send(error);
-            }
-
-            if (Utils.validateUserName(queryUser.name) !== null) {
-                const error = ErrorGenerator.invalidBodyParameter('name', req.originalUrl);
-                return res.status(error.status).send(error);
-            }
-
-            if (Utils.validateEmail(queryUser.email) !== null) {
-                const error = ErrorGenerator.invalidBodyParameter('email', req.originalUrl);
-                return res.status(error.status).send(error);
-            }
-
-            if (Utils.validatePassword(queryUser.password) !== null) {
-                const error = ErrorGenerator.invalidBodyParameter('password', req.originalUrl);
-                return res.status(error.status).send(error);
-            }
-
-            try {
-                const createdUser = await prisma.user.create({
-                    data: {
-                        name: queryUser.name,
-                        email: {
-                            create: {
-                                email: queryUser.email,
-                                verified: false
-                            }
-                        }
-                    }
-                });
-
-                return res.status(StatusCode.CREATED).send(createdUser);
-            } catch (ex) {
-                const prismaError = ErrorGenerator.prismaException(ex, req.originalUrl);
-                if (prismaError !== null) {
-                    return res.status(prismaError.status).send(prismaError);
-                }
-
-                const error = ErrorGenerator.unknownException(req.originalUrl);
-                return res.status(error.status).send(error);
-            }
-        });
-
         this.mRouter.patch(UsersRoutes.PATCH, Middlewares.validateAuthHeader, async (req, res) => {
             const queryUser: UserPatch = {
                 id: Number(req.params.id as string | undefined),
                 name: req.body.name as string | undefined,
-                email: req.body.email as string | undefined,
-                password: req.body.password as string | undefined
+                email: req.body.email as string | undefined
             };
 
             if (Utils.isFiniteNumber(queryUser.id)) {
@@ -135,7 +54,9 @@ export class UsersRouter {
                 return res.status(error.status).send(error);
             }
 
-            const tokenPayload = req.body.tokenPayload as AccessTokenPayload;
+            // TODO: Implement
+            throw new Error('Not implemented');
+            /*const tokenPayload = req.body.tokenPayload as AccessTokenPayload;
 
             if (queryUser.id !== tokenPayload.userID) { // Someone is trying to update someone's else account
                 const queryUserAdmin = prisma.admin.findFirst({
@@ -196,18 +117,7 @@ export class UsersRouter {
                 }
             });
 
-            return res.status(StatusCode.OK).send(updatedUser);
-        });
-
-        this.mRouter.delete(UsersRoutes.DELETE, Middlewares.validateAuthHeader, async (req, res) => {
-            const queryID = Number(req.params.id as string);
-            if (!Utils.isFiniteNumber(queryID)) {
-                const error = ErrorGenerator.invalidUrlParameter('id', req.originalUrl);
-                return res.status(error.status).send(error);
-            }
-
-            // TODO: Implement
-            throw new Error('Not implemented');
+            return res.status(StatusCode.OK).send(updatedUser);*/
         });
     }
 

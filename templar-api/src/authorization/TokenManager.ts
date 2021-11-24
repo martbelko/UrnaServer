@@ -6,12 +6,13 @@ dotenv.config();
 
 export interface AccessTokenPayload {
     userID: number;
-    userCreatedAt: Date;
+    steamID: number;
     refreshTokenID: number;
 }
 
 export interface RefreshTokenPayload {
     userID: number;
+    steamID: number;
     userCreatedAt: Date;
 }
 
