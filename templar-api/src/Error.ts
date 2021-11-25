@@ -10,9 +10,12 @@ export interface Error {
 }
 
 export enum ErrorID {
+    UNAUTHORIZED = 'unauthorized',
     FORBIDDEN = 'forbidden',
 
     INVALID_REFRESH_TOKEN = 'invalid-refresh-token',
+
+    STEAM_AUTH_FAIL = 'steam-authentication-fail',
 
     MISSING_BODY_PARAMETER = 'missing-body-parameter',
     MISSING_URL_PARAMETER = 'missing-url-parameter',
@@ -37,9 +40,12 @@ export enum ErrorID {
 }
 
 export enum ErrorTitle {
+    UNAUTHORIZED = 'Unauthorized',
     FORBIDDEN = 'Forbidden',
 
     INVALID_REFRESH_TOKEN = 'Invalid refresh token',
+
+    STEAM_AUTH_FAIL = 'Steam authentication failed',
 
     MISSING_BODY_PARAMETER = 'Missing body parameter',
     MISSING_URL_PARAMETER = 'Missing URL parameter',
@@ -84,7 +90,6 @@ export enum StatusCode {
     TERMPORARY_REDIRECT = 307, // The server sends this response to direct the client to get the requested resource at another URI with same method that was used in the prior request. This has the same semantics as the 302 Found HTTP response code, with the exception that the user agent must not change the HTTP method used: if a POST was used in the first request, a POST must be used in the second request.
     PERMANENT_REDIRECT = 308, // This means that the resource is now permanently located at another URI, specified by the Location: HTTP Response header. This has the same semantics as the 301 Moved Permanently HTTP response code, with the exception that the user agent must not change the HTTP method used: if a POST was used in the first request, a POST must be used in the second request.
 
-
     BAD_REQUEST = 400, // The request was invalid.
     UNAUTHORIZED = 401, // The request did not include an authentication token or the authentication token was expired.
     FORBIDDEN = 403, // The client did not have permission to access the requested resource.
@@ -121,6 +126,17 @@ export enum StatusCode {
 }
 
 export class ErrorGenerator {
+    public static unauthorized(instance: string): Error {
+        const error: Error = {
+            error: ErrorID.UNAUTHORIZED,
+            title: ErrorTitle.UNAUTHORIZED,
+            status: StatusCode.UNAUTHORIZED,
+            detail: 'Unauthorized',
+            instance: instance
+        };
+        return error;
+    }
+
     public static forbidden(instance: string): Error {
         const error: Error = {
             error: ErrorID.FORBIDDEN,
@@ -138,6 +154,17 @@ export class ErrorGenerator {
             title: ErrorTitle.INVALID_REFRESH_TOKEN,
             status: StatusCode.FORBIDDEN,
             detail: 'Refresh token is invalid',
+            instance: instance
+        };
+        return error;
+    }
+
+    public static steamAuthFail(instance: string): Error {
+        const error: Error = {
+            error: ErrorID.STEAM_AUTH_FAIL,
+            title: ErrorTitle.STEAM_AUTH_FAIL,
+            status: StatusCode.FORBIDDEN,
+            detail: 'Steam authentication failed',
             instance: instance
         };
         return error;
@@ -304,7 +331,7 @@ export class ErrorGenerator {
             const error: Error = {
                 error: ErrorID.PRISMA_CLIENT_UNKNOWN_REQUEST_ERROR,
                 title: ErrorTitle.PRISMA_CLIENT_UNKNOWN_REQUEST_ERROR,
-                status: 400,
+                status: StatusCode.BAD_REQUEST,
                 detail: ex.message,
                 instance: instance
             };

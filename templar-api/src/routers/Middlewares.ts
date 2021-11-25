@@ -25,6 +25,6 @@ export class Middlewares {
         }
 
         req.body.tokenPayload = accessTokenPayload;
-        next();
+        return next();
     }
 }

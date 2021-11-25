@@ -52,39 +52,27 @@ function isValidImmunity(immunity: number): boolean {
         immunity < Constants.MAX_IMMUNITY;
 }
 
-interface AdminGet {
-    id: number;
-    name: string | undefined;
-    steamID: string | undefined;
-    csFlags: number;
-    webFlags: number;
-    dcFlags: number;
-
-    minImmunity: number;
-    maxImmunity: number;
-}
-
 export class AdminsRouter {
     public constructor() {
-        this.mRouter.get(AdminsRoutes.GET, async (req, res) => {
-            const query: AdminGet = {
+        this.mRouter.get(AdminsRoutes.GET, Middlewares.validateAuthHeader, async (req, res) => {
+            const query = {
                 id: Number(req.query.id as string | undefined),
-                name: req.query.name as string | undefined,
+                nickname: req.query.nickname as string | undefined,
                 steamID: req.query.steamID as string | undefined,
                 csFlags: Number(req.query.csFlags as string | undefined),
                 webFlags: Number(req.query.webFlags as string | undefined),
                 dcFlags: Number(req.query.dcFlags as string | undefined),
 
                 minImmunity: Number(req.query.minImmunity as string | undefined),
-                maxImmunity: Number(req.query.maxImmunity as string | undefined),
+                maxImmunity: Number(req.query.maxImmunity as string | undefined)
             };
 
             let admins = await prisma.admin.findMany({
                 where: {
                     id: Utils.isFiniteNumber(query.id) ? query.id : undefined,
-                    steamID: query.steamID,
+                    nickname: query.nickname,
                     user: {
-                        name: query.name
+                        steamID: query.steamID
                     }
                 }
             });
@@ -132,7 +120,7 @@ export class AdminsRouter {
         this.mRouter.post(AdminsRoutes.POST, Middlewares.validateAuthHeader, async (req, res) => {
             interface AdminPost {
                 userID: number;
-                steamID: string | undefined;
+                nickname: string | undefined;
                 csFlags: number;
                 webFlags: number;
                 dcFlags: number;
@@ -165,7 +153,7 @@ export class AdminsRouter {
 
             const query: AdminPost = {
                 userID: Number(req.body.id as string | undefined),
-                steamID: req.body.steamID as string | undefined,
+                nickname: req.body.nickname as string | undefined,
                 csFlags: Number(req.body.csFlags as string | undefined),
                 webFlags: Number(req.body.webFlags as string | undefined),
                 dcFlags: Number(req.body.dcFlags as string | undefined),
@@ -177,13 +165,8 @@ export class AdminsRouter {
                 return res.status(error.status).send(error);
             }
 
-            if (query.steamID === undefined) {
-                const error = ErrorGenerator.invalidBodyParameter('steamID', req.originalUrl);
-                return res.status(error.status).send(error);
-            }
-
-            if (!Constants.STEAM_ID_REGEG.test(query.steamID)) {
-                const error = ErrorGenerator.invalidBodyParameter('steamID', req.originalUrl);
+            if (query.nickname === undefined) {
+                const error = ErrorGenerator.missingBodyParameter('nickname', req.originalUrl);
                 return res.status(error.status).send(error);
             }
 
@@ -211,7 +194,7 @@ export class AdminsRouter {
                 const newAdmin = await prisma.admin.create({
                     data: {
                         userID: query.userID,
-                        steamID: query.steamID,
+                        nickname: query.nickname,
                         csFlags: query.csFlags,
                         webFlags: query.webFlags,
                         dcFlags: query.dcFlags,

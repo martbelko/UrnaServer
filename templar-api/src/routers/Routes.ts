@@ -11,5 +11,8 @@ export enum AdminsRoutes {
 }
 
 export enum AuthRoutes {
-    TOKEN_POST = '/auth/token'
+    TOKEN_POST = '/auth/token',
+    STEAM_AUTH = '/auth/steam',
+    STEAM_AUTH_RETURN = '/auth/steam/return',
+    STEAM_AUTH_FAIL = '/auth/steam/fail'
 }

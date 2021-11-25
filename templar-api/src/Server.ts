@@ -5,17 +5,17 @@ import passport from 'passport';
 import passportSteam from 'passport-steam';
 
 import { UsersRouter } from './routers/Users/Users';
-import { AdminsRoutes, UsersRoutes } from './routers/Routes';
+import { AdminsRoutes, AuthRoutes, UsersRoutes } from './routers/Routes';
 import { AdminsRouter } from './routers/Admins/Admins';
+import { TokenRouter } from './routers/Auth/Auth';
+import { AccessTokenPayload, RefreshTokenPayload, TokenManager } from './authorization/TokenManager';
+import { ErrorGenerator } from './Error';
+import { PrismaClient } from '.prisma/client';
+import { Constants } from './Constants';
 
 dotenv.config();
 const app = express();
-
-interface SteamProfile {
-    _json: {
-        steamid: string;
-    }
-}
+const prisma = new PrismaClient();
 
 const steamApiKey = process.env.STEAM_API_KEY;
 
@@ -29,13 +29,30 @@ export class Server {
         app.use(cors());
         app.enable('trust proxy');
 
+        /* PASSPORT JS */
+        interface SteamProfile {
+            _json: {
+                steamid: string;
+            }
+        }
+
+        passport.serializeUser(function(user, done) {
+            done(null, user);
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        passport.deserializeUser(function(user: any, done) {
+            done(null, user);
+        });
+
         // Setup passport and steam strategy
         passport.use(new passportSteam.Strategy({
             // TODO: Use process.env.IP instead of localhost
-            returnURL: 'http://localhost:' + port + '/api/auth/steam/return',
+            returnURL: 'http://localhost:' + port + AuthRoutes.STEAM_AUTH_RETURN,
             realm: 'http://localhost:' + port + '/',
             apiKey: steamApiKey
         }, function (identifier: string, profile: SteamProfile, done: (arg0: null, arg1: unknown) => unknown) {
+            console.log(profile);
             request.user = profile._json.steamid;
             return done(null, profile._json.steamid);
         }
@@ -43,8 +60,73 @@ export class Server {
 
         app.use(passport.initialize());
 
+        app.get(AuthRoutes.STEAM_AUTH, passport.authenticate('steam', { failureRedirect: AuthRoutes.STEAM_AUTH_FAIL }), function (req, res) {
+            return res.redirect(AuthRoutes.STEAM_AUTH_RETURN);
+        });
+
+        app.get(AuthRoutes.STEAM_AUTH_RETURN, passport.authenticate('steam', { failureRedirect: AuthRoutes.STEAM_AUTH_FAIL }), async function (req, res) {
+            const steamID = req.user as string | undefined;
+            if (steamID == undefined) { // Also check for null
+                const error = ErrorGenerator.unauthorized(req.originalUrl);
+                return res.status(error.status).send(error);
+            }
+
+            try {
+                await prisma.$transaction(async (prisma) => {
+                    const user = await prisma.user.upsert({
+                        where: {
+                            steamID: steamID
+                        },
+                        create: {
+                            steamID: steamID
+                        },
+                        update: {
+                            steamID: steamID
+                        }
+                    });
+
+                    const rtp: RefreshTokenPayload = {
+                        userID: user.id,
+                        userCreatedAt: user.createdAt
+                    };
+
+                    const refreshToken = TokenManager.generateRefreshToken(rtp);
+                    const refreshTokenDB = await prisma.refreshToken.create({
+                        data: {
+                            userID: user.id,
+                            token: refreshToken,
+                            expiresIn: Constants.REFRESH_TOKEN_EXPIRATION
+                        }
+                    });
+
+                    const atp: AccessTokenPayload = {
+                        userID: user.id,
+                        userCreatedAt: user.createdAt,
+                        refreshTokenID: refreshTokenDB.id
+                    };
+
+                    const accessToken = TokenManager.generateAccessToken(atp);
+
+                    return res.send({ accessToken: accessToken, refreshToken: refreshToken });
+                });
+            } catch (ex) {
+                let error = ErrorGenerator.prismaException(ex, req.originalUrl);
+                if (error === null) {
+                    error = ErrorGenerator.unknownException(req.originalUrl);
+                }
+
+                return res.status(error.status).send(error);
+            }
+        });
+
+        app.get(AuthRoutes.STEAM_AUTH_FAIL, passport.authenticate('steam', { failureRedirect: AuthRoutes.STEAM_AUTH_FAIL }), function (req, res) {
+            const error = ErrorGenerator.steamAuthFail(req.originalUrl);
+            return res.status(error.status).send(error);
+        });
+
         const userGetRouter = new UsersRouter();
         const adminsRouter = new AdminsRouter();
+        const tokenRouter = new TokenRouter();
 
         app.get(UsersRoutes.GET, userGetRouter.getRouter());
         app.patch(UsersRoutes.PATCH, userGetRouter.getRouter());
@@ -52,13 +134,7 @@ export class Server {
         app.get(AdminsRoutes.GET, adminsRouter.getRouter());
         app.post(AdminsRoutes.POST, adminsRouter.getRouter());
 
-        app.get('/api/auth/steam', passport.authenticate('steam', { failureRedirect: '/api/auth/steam/fail' }), function (req, res) {
-            return res.redirect('/api/auth/steam/return');
-        });
-
-        app.get('/api/auth/steam/return', passport.authenticate('steam', { failureRedirect: '/api/auth/steam/fail' }), function (req, res) {
-            return res.send(req.user);
-        });
+        app.post(AuthRoutes.TOKEN_POST, tokenRouter.getRouter());
 
         app.listen(port, callback);
     }

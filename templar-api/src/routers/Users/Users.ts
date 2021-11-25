@@ -6,18 +6,15 @@ import { ErrorGenerator, StatusCode } from '../../Error';
 import { Utils } from '../../utils/Utils';
 import { UsersRoutes } from '../Routes';
 
-
 const prisma = new PrismaClient();
 
 class UserGet {
     public constructor(req: Request) {
         this.id = Number(req.query.id as string | undefined);
-        this.name = req.query.name as string | undefined;
         this.steamID = req.query.steamID as string | undefined;
     }
 
     public readonly id: number;
-    public readonly name: string | undefined;
     public readonly steamID: string | undefined;
 }
 
@@ -34,7 +31,6 @@ export class UsersRouter {
             const users = await prisma.user.findMany({
                 where: {
                     id: Utils.isFiniteNumber(queryUser.id) ? queryUser.id : undefined,
-                    name: queryUser.name,
                     steamID: queryUser.steamID
                 }
             });

@@ -6,13 +6,12 @@ dotenv.config();
 
 export interface AccessTokenPayload {
     userID: number;
-    steamID: number;
+    userCreatedAt: Date;
     refreshTokenID: number;
 }
 
 export interface RefreshTokenPayload {
     userID: number;
-    steamID: number;
     userCreatedAt: Date;
 }
 
@@ -38,23 +37,29 @@ export class TokenManager {
     }
 
     public static verifyAccessToken(accessToken: string): AccessTokenPayload | null {
-        const jwtPayload = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET as string);
-        if (typeof jwtPayload === 'string') {
+        try {
+            const jwtPayload = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET as string);
+            if (typeof jwtPayload === 'string') {
+                return null;
+            }
+
+            return jwtPayload as unknown as AccessTokenPayload;
+        } catch(ex) {
             return null;
         }
-
-        const payload = jwtPayload as unknown as AccessTokenPayload;
-        return payload;
     }
 
     public static verifyRefreshToken(refreshToken: string): RefreshTokenPayload | null {
-        const jwtPayload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string);
-        if (typeof jwtPayload === 'string') {
+        try {
+            const jwtPayload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string);
+            if (typeof jwtPayload === 'string') {
+                return null;
+            }
+
+            return jwtPayload as unknown as RefreshTokenPayload;
+        } catch (ex) {
             return null;
         }
-
-        const payload = jwtPayload as unknown as RefreshTokenPayload;
-        return payload;
     }
 
     private static readonly ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;

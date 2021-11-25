@@ -1,12 +1,16 @@
 import express from 'express';
+import { PrismaClient } from '@prisma/client';
 
 import { ErrorGenerator } from '../../Error';
 import { AuthRoutes } from '../Routes';
-import { TokenManager } from '../../authorization/TokenManager';
+import { AccessTokenPayload, TokenManager } from '../../authorization/TokenManager';
+import { Utils } from './../../utils/Utils';
+
+const prisma = new PrismaClient();
 
 export class TokenRouter {
     public constructor() {
-        this.mRouter.post(AuthRoutes.TOKEN_POST, async (req, res) => {
+        this.mRouter.post(AuthRoutes.TOKEN_POST, async (req, res) => { // Generate new access token
             const refreshToken = req.body.refreshToken as string;
             if (refreshToken === undefined) {
                 const error = ErrorGenerator.missingBodyParameter('refreshToken', req.originalUrl);
@@ -19,37 +23,44 @@ export class TokenRouter {
                 return res.status(error.status).send(error);
             }
 
-
-            // TODO: Implement
-            throw new Error('Not implemented');
-
             // Should not happen, but check anyway
-            /*if (refreshTokenPayload.userID === undefined || Utils.isFiniteNumber(refreshTokenPayload.userID) ||
+            if (refreshTokenPayload.userID === undefined || !Utils.isFiniteNumber(refreshTokenPayload.userID) ||
                 refreshTokenPayload.userCreatedAt === undefined) {
                 const error = ErrorGenerator.invalidRefreshToken(req.originalUrl);
                 return res.status(error.status).send(error);
             }
 
-            const refreshTokenDB = await prisma.refreshToken.findFirst({
-                where: {
-                    userID: refreshTokenPayload.userID,
-                    userCreatedAt: refreshTokenPayload.createdAt
+            try {
+                const refreshTokenDB = await prisma.refreshToken.findFirst({
+                    where: {
+                        user: {
+                            id: refreshTokenPayload.userID,
+                            createdAt: refreshTokenPayload.userCreatedAt
+                        }
+                    }
+                });
+
+                if (refreshTokenDB === null) {
+                    const error = ErrorGenerator.invalidRefreshToken(req.originalUrl);
+                    return res.status(error.status).send(error);
                 }
-            });
 
-            if (refreshTokenDB == null) {
+                const accessTokenPayload: AccessTokenPayload = {
+                    userID: refreshTokenPayload.userID,
+                    userCreatedAt: refreshTokenPayload.userCreatedAt,
+                    refreshTokenID: refreshTokenDB.id
+                };
 
-                return res.sendStatus(401);
+                const accessToken = TokenManager.generateAccessToken(accessTokenPayload);
+                return res.send({ accessToken: accessToken });
+            } catch (ex) {
+                let error = ErrorGenerator.prismaException(ex, req.originalUrl);
+                if (error === null) {
+                    error = ErrorGenerator.unknownException(req.originalUrl);
+                }
+
+                return res.status(error.status).send(error);
             }
-
-            const accessTokenPayload: AccessTokenPayload = {
-                userid: refreshTokenPayload.userid,
-                createdAt: refreshTokenPayload.createdAt,
-                refreshTokenId: refreshTokenDb.id
-            };
-
-            const accessToken = generateAccessToken(accessTokenPayload);
-            return res.send({ accessToken: accessToken });*/
         });
     }
 
