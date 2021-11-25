@@ -3,8 +3,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export class Constants {
-    static readonly STEAM_ID_REGEG = new RegExp(/^STEAM_[0-5]:[01]:\d+$/);
-
     static readonly MIN_IMMUNITY = 0;
     static readonly MAX_IMMUNITY = 100;
 
