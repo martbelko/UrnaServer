@@ -6,7 +6,7 @@ export enum UsersRoutes {
 export enum AdminsRoutes {
     GET = '/api/admins',
     POST = '/api/admins',
-    PATCH = '/api/admins/:id',
+    PUT = '/api/admins/:id',
     DELETE = '/api/admins/:id'
 }
 
@@ -15,4 +15,10 @@ export enum AuthRoutes {
     STEAM_AUTH = '/auth/steam',
     STEAM_AUTH_RETURN = '/auth/steam/return',
     STEAM_AUTH_FAIL = '/auth/steam/fail'
+}
+
+export enum ServersRoutes {
+    SERVERS_GET = '/api/servers',
+    SERVERS_PUT = '/api/servers/:id',
+    ON_CLIENT_CONNECT_POST = '/api/servers/on-client-connect'
 }

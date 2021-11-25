@@ -6,13 +6,14 @@ import passport from 'passport';
 import passportSteam from 'passport-steam';
 
 import { UsersRouter } from './routers/Users/Users';
-import { AdminsRoutes, AuthRoutes, UsersRoutes } from './routers/Routes';
+import { AdminsRoutes, AuthRoutes, ServersRoutes, UsersRoutes } from './routers/Routes';
 import { AdminsRouter } from './routers/Admins/Admins';
 import { TokenRouter } from './routers/Auth/Auth';
 import { AccessTokenPayload, RefreshTokenPayload, TokenManager } from './authorization/TokenManager';
 import { ErrorGenerator } from './Error';
 import { Constants } from './Constants';
 import { Middlewares } from './routers/Middlewares';
+import { ServersRouter } from './routers/Servers/Servers';
 
 dotenv.config();
 const app = express();
@@ -30,7 +31,6 @@ export class Server {
         app.use(express.json());
         app.use(cors());
 
-        app.use(Middlewares.validateDateHeader);
         app.use(Middlewares.rateLimiter);
 
         /* PASSPORT JS */
@@ -56,7 +56,6 @@ export class Server {
             realm: 'http://localhost:' + port + '/',
             apiKey: steamApiKey
         }, function (identifier: string, profile: SteamProfile, done: (arg0: null, arg1: unknown) => unknown) {
-            console.log(profile);
             request.user = profile._json.steamid;
             return done(null, profile._json.steamid);
         }
@@ -129,6 +128,7 @@ export class Server {
 
         const userGetRouter = new UsersRouter();
         const adminsRouter = new AdminsRouter();
+        const serversRouter = new ServersRouter();
         const tokenRouter = new TokenRouter();
 
         app.get(UsersRoutes.GET, userGetRouter.getRouter());
@@ -136,6 +136,12 @@ export class Server {
 
         app.get(AdminsRoutes.GET, adminsRouter.getRouter());
         app.post(AdminsRoutes.POST, adminsRouter.getRouter());
+        app.put(AdminsRoutes.PUT, adminsRouter.getRouter());
+        app.delete(AdminsRoutes.DELETE, adminsRouter.getRouter());
+
+        app.get(ServersRoutes.SERVERS_GET, serversRouter.getRouter());
+        app.put(ServersRoutes.SERVERS_PUT, serversRouter.getRouter());
+        app.post(ServersRoutes.ON_CLIENT_CONNECT_POST, serversRouter.getRouter());
 
         app.post(AuthRoutes.TOKEN_POST, tokenRouter.getRouter());
 
