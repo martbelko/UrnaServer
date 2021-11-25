@@ -20,10 +20,7 @@ function isValidFlagsInternal(flags: number, enumLen: number): boolean {
         return false;
     }
 
-    let maxSum = 0;
-    for (let i = 0; i < enumLen; ++i) {
-        maxSum += 1 << i;
-    }
+    const maxSum = Math.pow(2, enumLen) - 1;
 
     if (flags > maxSum) {
         return false;
