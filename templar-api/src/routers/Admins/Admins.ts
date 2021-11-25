@@ -67,66 +67,66 @@ export class AdminsRouter {
                 maxImmunity: Number(req.query.maxImmunity as string | undefined)
             };
 
-            let admins = await prisma.admin.findMany({
-                where: {
-                    id: Utils.isFiniteNumber(query.id) ? query.id : undefined,
-                    nickname: query.nickname,
-                    user: {
-                        steamID: query.steamID
+            try {
+                let admins = await prisma.admin.findMany({
+                    where: {
+                        id: Utils.isFiniteNumber(query.id) ? query.id : undefined,
+                        nickname: query.nickname,
+                        user: {
+                            steamID: query.steamID
+                        }
                     }
-                }
-            });
+                });
 
-            admins = admins.filter(admin => {
-                // Check flags
-                const flagsManager = new FlagsManager(admin.csFlags, admin.webFlags, admin.dcFlags);
-                if (Utils.isFiniteNumber(query.csFlags)) {
-                    if (!flagsManager.hasCSFlags(query.csFlags)) {
-                        return false;
+                admins = admins.filter(admin => {
+                    // Check flags
+                    const flagsManager = new FlagsManager(admin.csFlags, admin.webFlags, admin.dcFlags);
+                    if (Utils.isFiniteNumber(query.csFlags)) {
+                        if (!flagsManager.hasCSFlags(query.csFlags)) {
+                            return false;
+                        }
                     }
-                }
 
-                if (Utils.isFiniteNumber(query.webFlags)) {
-                    if (!flagsManager.hasWebFlags(query.webFlags)) {
-                        return false;
+                    if (Utils.isFiniteNumber(query.webFlags)) {
+                        if (!flagsManager.hasWebFlags(query.webFlags)) {
+                            return false;
+                        }
                     }
-                }
 
-                if (Utils.isFiniteNumber(query.dcFlags)) {
-                    if (!flagsManager.hasDCFlags(query.dcFlags)) {
-                        return false;
+                    if (Utils.isFiniteNumber(query.dcFlags)) {
+                        if (!flagsManager.hasDCFlags(query.dcFlags)) {
+                            return false;
+                        }
                     }
-                }
 
-                // Check immunity
-                if (Utils.isFiniteNumber(query.minImmunity)) {
-                    if (admin.immunity < query.minImmunity) {
-                        return false;
+                    // Check immunity
+                    if (Utils.isFiniteNumber(query.minImmunity)) {
+                        if (admin.immunity < query.minImmunity) {
+                            return false;
+                        }
                     }
-                }
 
-                if (Utils.isFiniteNumber(query.maxImmunity)) {
-                    if (admin.immunity > query.maxImmunity) {
-                        return false;
+                    if (Utils.isFiniteNumber(query.maxImmunity)) {
+                        if (admin.immunity > query.maxImmunity) {
+                            return false;
+                        }
                     }
+
+                    return true;
+                });
+
+                return res.status(StatusCode.OK).send(admins);
+            } catch (ex) {
+                let error = ErrorGenerator.prismaException(ex, req.originalUrl);
+                if (error === null) {
+                    error = ErrorGenerator.unknownException(req.originalUrl);
                 }
 
-                return true;
-            });
-
-            return res.status(StatusCode.OK).send(admins);
+                return res.status(error.status).send(error);
+            }
         });
 
         this.mRouter.post(AdminsRoutes.POST, Middlewares.validateAuthHeader, async (req, res) => {
-            interface AdminPost {
-                userID: number;
-                nickname: string | undefined;
-                csFlags: number;
-                webFlags: number;
-                dcFlags: number;
-                immunity: number;
-            }
-
             const tokenPayload = req.body.tokenPayload as AccessTokenPayload;
             const reqAdmin = await prisma.admin.findFirst({
                 select: {
@@ -147,11 +147,10 @@ export class AdminsRouter {
             const fm = new FlagsManager(reqAdmin.csFlags, reqAdmin.webFlags, reqAdmin.dcFlags);
             if (!fm.hasWebFlags(WebFlag.ADD_NEW_ADMIN)) {
                 const error = ErrorGenerator.forbidden(req.originalUrl);
-                error.detail = 'No admin flags';
                 return res.status(error.status).send(error);
             }
 
-            const query: AdminPost = {
+            const query = {
                 userID: Number(req.body.id as string | undefined),
                 nickname: req.body.nickname as string | undefined,
                 csFlags: Number(req.body.csFlags as string | undefined),
@@ -165,7 +164,7 @@ export class AdminsRouter {
                 return res.status(error.status).send(error);
             }
 
-            if (query.nickname === undefined) {
+            if (query.nickname === undefined) { // TODO: More validation on nickname
                 const error = ErrorGenerator.missingBodyParameter('nickname', req.originalUrl);
                 return res.status(error.status).send(error);
             }
@@ -211,6 +210,122 @@ export class AdminsRouter {
 
                 return res.status(error.status).send(error);
             }
+        });
+
+        this.mRouter.put(AdminsRoutes.PUT, Middlewares.validateAuthHeader, async (req, res) => {
+            const tokenPayload = req.body.tokenPayload as AccessTokenPayload;
+            try {
+                const reqAdmin = await prisma.admin.findFirst({
+                    select: {
+                        csFlags: true,
+                        webFlags: true,
+                        dcFlags: true
+                    },
+                    where: {
+                        userID: tokenPayload.userID
+                    }
+                });
+
+                if (reqAdmin === null) {
+                    const error = ErrorGenerator.forbidden(req.originalUrl);
+                    return res.status(error.status).send(error);
+                }
+
+                const fm = new FlagsManager(reqAdmin.csFlags, reqAdmin.webFlags, reqAdmin.dcFlags);
+                if (!fm.hasWebFlags(WebFlag.UPDATE_ADMIN_FLAGS)) {
+                    const error = ErrorGenerator.forbidden(req.originalUrl);
+                    return res.status(error.status).send(error);
+                }
+
+                const selectedAdminID = Number(req.params.id as string);
+                if (!Utils.isFiniteNumber(selectedAdminID)) {
+                    const error = ErrorGenerator.invalidUrlParameter('id', req.originalUrl);
+                    return res.status(error.status).send(error);
+                }
+
+                const body = {
+                    nickname: req.body.nickname as string | undefined,
+                    csFlags: Number(req.body.csFlags as string | undefined),
+                    webFlags: Number(req.body.webFlags as string | undefined),
+                    dcFlags: Number(req.body.dcFlags as string | undefined),
+                    immunity: Number(req.body.immunity as string | undefined)
+                };
+
+                if (body.nickname === undefined) {
+                    const error = ErrorGenerator.invalidBodyParameter('nickname', req.originalUrl);
+                    return res.status(error.status).send(error);
+                }
+
+                // TODO: Validate nickname
+
+                if (!isValidCSFlags(body.csFlags)) {
+                    const error = ErrorGenerator.invalidBodyParameter('csFlags', req.originalUrl);
+                    return res.status(error.status).send(error);
+                }
+
+                if (!isValidWebFlags(body.webFlags)) {
+                    const error = ErrorGenerator.invalidBodyParameter('webFlags', req.originalUrl);
+                    return res.status(error.status).send(error);
+                }
+
+                if (!isValidDCFlags(body.dcFlags)) {
+                    const error = ErrorGenerator.invalidBodyParameter('dcFlags', req.originalUrl);
+                    return res.status(error.status).send(error);
+                }
+
+                if (!isValidImmunity(body.immunity)) {
+                    const error = ErrorGenerator.invalidBodyParameter('immunity', req.originalUrl);
+                    return res.status(error.status).send(error);
+                }
+
+                const target = await prisma.admin.findFirst({
+                    select: {
+                        id: true
+                    },
+                    where: {
+                        id: selectedAdminID
+                    }
+                });
+
+                if (target === null) {
+                    const error = ErrorGenerator.missingUrlParameter('id', req.originalUrl);
+                    return res.status(error.status).send(error);
+                }
+
+                const updatedAdmin = await prisma.admin.update({
+                    data: {
+                        nickname: body.nickname,
+                        csFlags: body.csFlags,
+                        webFlags: body.webFlags,
+                        dcFlags: body.dcFlags,
+                        immunity: body.immunity
+                    },
+                    where: {
+                        id: target.id
+                    },
+                    select: {
+                        nickname: true,
+                        csFlags: true,
+                        webFlags: true,
+                        dcFlags: true,
+                        immunity: true
+                    }
+                });
+
+                return res.status(StatusCode.OK).send(updatedAdmin);
+            } catch (ex) {
+                let error = ErrorGenerator.prismaException(ex, req.originalUrl);
+                if (error === null) {
+                    error = ErrorGenerator.unknownException(req.originalUrl);
+                }
+
+                return res.status(error.status).send(error);
+            }
+        });
+
+        this.mRouter.delete(AdminsRoutes.DELETE, Middlewares.validateAuthHeader, async (req, res) => {
+            // TODO: Implement
+            return res.sendStatus(StatusCode.NOT_IMPLEMENTED);
         });
     }
 
