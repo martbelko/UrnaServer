@@ -24,6 +24,7 @@ model User {
 
   admin Admin?
   vips  Vip[]
+  Ban   Ban[]
 }
 
 model RefreshToken {
@@ -81,11 +82,12 @@ model BanInfo {
   steamID64 String @db.VarChar(32)
   ip        String @db.VarChar(32)
 
-  bans Ban?
+  ban Ban?
 }
 
 model Ban {
-  id Int @id @default(autoincrement())
+  id           Int @id @default(autoincrement())
+  targetUserID Int
 
   adminID   Int
   banInfoID Int @unique
@@ -100,10 +102,11 @@ model Ban {
 
   serverID Int?
 
-  banInfo BanInfo @relation(fields: [banInfoID], references: [id]) // Info about the target client
-  admin   Admin   @relation(fields: [adminID], references: [id])
-  unban   Unban?
-  server  Server? @relation(fields: [serverID], references: [id])
+  targetUser User    @relation(fields: [targetUserID], references: [id])
+  banInfo    BanInfo @relation(fields: [banInfoID], references: [id]) // Info about the target client
+  admin      Admin   @relation(fields: [adminID], references: [id])
+  unban      Unban?
+  server     Server? @relation(fields: [serverID], references: [id])
 }
 
 model Unban {

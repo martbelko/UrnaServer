@@ -1,10 +1,12 @@
 -- CreateEnum
 CREATE TYPE "VipMode" AS ENUM ('NORMAL', 'EXTRA');
 
+-- CreateEnum
+CREATE TYPE "ServerType" AS ENUM ('JAILBREAK');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
     "steamID" TEXT NOT NULL,
     "emailID" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -38,6 +40,7 @@ CREATE TABLE "Server" (
     "id" SERIAL NOT NULL,
     "ip" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "serverType" "ServerType" NOT NULL,
 
     CONSTRAINT "Server_pkey" PRIMARY KEY ("id")
 );
@@ -45,6 +48,7 @@ CREATE TABLE "Server" (
 -- CreateTable
 CREATE TABLE "Admin" (
     "id" SERIAL NOT NULL,
+    "nickname" VARCHAR(32) NOT NULL,
     "csFlags" INTEGER NOT NULL,
     "webFlags" INTEGER NOT NULL,
     "dcFlags" INTEGER NOT NULL,
@@ -71,6 +75,7 @@ CREATE TABLE "BanInfo" (
 -- CreateTable
 CREATE TABLE "Ban" (
     "id" SERIAL NOT NULL,
+    "targetUserID" INTEGER NOT NULL,
     "adminID" INTEGER NOT NULL,
     "banInfoID" INTEGER NOT NULL,
     "unbanID" INTEGER,
@@ -97,15 +102,12 @@ CREATE TABLE "Unban" (
 -- CreateTable
 CREATE TABLE "Vip" (
     "id" SERIAL NOT NULL,
-    "userid" INTEGER NOT NULL,
-    "steamid" VARCHAR(32) NOT NULL,
+    "userID" INTEGER NOT NULL,
     "vipMode" "VipMode" NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Vip_pkey" PRIMARY KEY ("id")
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_name_key" ON "User"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_steamID_key" ON "User"("steamID");
@@ -121,6 +123,12 @@ CREATE UNIQUE INDEX "Email_email_key" ON "Email"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Server_ip_key" ON "Server"("ip");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Server_name_key" ON "Server"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Admin_nickname_key" ON "Admin"("nickname");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Admin_userID_key" ON "Admin"("userID");
@@ -144,6 +152,9 @@ ALTER TABLE "RefreshToken" ADD CONSTRAINT "RefreshToken_userID_fkey" FOREIGN KEY
 ALTER TABLE "Admin" ADD CONSTRAINT "Admin_userID_fkey" FOREIGN KEY ("userID") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Ban" ADD CONSTRAINT "Ban_targetUserID_fkey" FOREIGN KEY ("targetUserID") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Ban" ADD CONSTRAINT "Ban_banInfoID_fkey" FOREIGN KEY ("banInfoID") REFERENCES "BanInfo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -159,4 +170,4 @@ ALTER TABLE "Unban" ADD CONSTRAINT "Unban_adminID_fkey" FOREIGN KEY ("adminID") 
 ALTER TABLE "Unban" ADD CONSTRAINT "Unban_banID_fkey" FOREIGN KEY ("banID") REFERENCES "Ban"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Vip" ADD CONSTRAINT "Vip_userid_fkey" FOREIGN KEY ("userid") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Vip" ADD CONSTRAINT "Vip_userID_fkey" FOREIGN KEY ("userID") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
