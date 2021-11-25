@@ -4,13 +4,14 @@ import dotenv from 'dotenv';
 import { Constants } from './Constants';
 import { TokenManager } from './authorization/TokenManager';
 import { Server } from './Server';
+import { Utils } from './utils/Utils';
 
 dotenv.config();
 const prisma = new PrismaClient();
 
 async function main() {
     const port = Constants.REST_PORT;
-    if (isNaN(port) || !isFinite(port) || port == 0) {
+    if (!Utils.isFiniteNumber(port) || port === 0) {
         throw new Error('Invalid port');
     }
 

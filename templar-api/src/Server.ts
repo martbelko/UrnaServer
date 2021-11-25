@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express, { request } from 'express';
+import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
 import passport from 'passport';
 import passportSteam from 'passport-steam';
@@ -10,7 +11,6 @@ import { AdminsRouter } from './routers/Admins/Admins';
 import { TokenRouter } from './routers/Auth/Auth';
 import { AccessTokenPayload, RefreshTokenPayload, TokenManager } from './authorization/TokenManager';
 import { ErrorGenerator } from './Error';
-import { PrismaClient } from '.prisma/client';
 import { Constants } from './Constants';
 import { Middlewares } from './routers/Middlewares';
 
@@ -26,9 +26,11 @@ export class Server {
             throw new Error('env.STEAM_API_KEY is undefined');
         }
 
+        app.enable('trust proxy');
         app.use(express.json());
         app.use(cors());
-        app.enable('trust proxy');
+
+        app.use(Middlewares.validateDateHeader);
         app.use(Middlewares.rateLimiter);
 
         /* PASSPORT JS */
@@ -108,7 +110,6 @@ export class Server {
                     };
 
                     const accessToken = TokenManager.generateAccessToken(atp);
-
                     return res.send({ accessToken: accessToken, refreshToken: refreshToken });
                 });
             } catch (ex) {

@@ -6,31 +6,25 @@ import { ErrorGenerator } from './../Error';
 import { Constants } from './../Constants';
 
 class RateLimiter {
-    public constructor(maxLimit: number) {
+    public constructor(maxLimit: number, durationInSeconds: number) {
         this.maxLimit = maxLimit;
-        this.mNextReset = Math.ceil(Date.now() / 1000.0) + 60;
+        this.durationInSeconds = durationInSeconds;
+        this.mNextReset = Math.ceil(Date.now() / 1000.0) + durationInSeconds;
 
-        const interval = 1000; // ms
-        let expected = Date.now() + interval;
+        const durationInMs = durationInSeconds * 1000;
+
+        let expected = Date.now() + durationInMs;
         const step = () => {
             const dt = Date.now() - expected; // the drift (positive for overshooting)
-            if (dt > interval) {
-                // something really bad happened. Maybe the browser (tab) was inactive?
-                // possibly special handling to avoid futile "catch up" run
-            }
 
-            if (this.mCurrentElapsedSeconds >= this.durationInSeconds) {
-                this.mLimiter.clear();
-                this.mCurrentElapsedSeconds = 0;
-            } else {
-                ++this.mCurrentElapsedSeconds;
-            }
+            this.mLimiter.clear();
+            this.mNextReset = Math.ceil(Date.now() / 1000.0) + durationInSeconds;
 
-            expected += interval;
-            setTimeout(step, Math.max(0, interval - dt)); // take into account drift
+            expected += durationInSeconds;
+            setTimeout(step, Math.max(0, durationInMs - dt)); // take into account drift
         };
 
-        setTimeout(step, interval);
+        setTimeout(step, durationInMs);
     }
 
     public getResetTimeSinceEpoch(): number {
@@ -38,7 +32,7 @@ class RateLimiter {
     }
 
     public getRemainingSecondsBeforeReset(): number {
-        return this.durationInSeconds - this.mCurrentElapsedSeconds;
+        return this.mNextReset - Math.ceil(Date.now() / 1000.0);
     }
 
     public decreaseRemainingRequests(ip: string): boolean {
@@ -62,14 +56,13 @@ class RateLimiter {
     }
 
     public readonly maxLimit: number;
-    public readonly durationInSeconds = Constants.RATE_LIMITER_DURATION;
+    public readonly durationInSeconds: number;
 
     private mLimiter = new Map();
-    private mCurrentElapsedSeconds = 0;
-    private mNextReset = 0;
+    private mNextReset = Date.now();
 }
 
-const rateLimiter = new RateLimiter(Constants.MAX_REQUESTS_PER_DURATION);
+const rateLimiter = new RateLimiter(Constants.MAX_REQUESTS_PER_DURATION, Constants.RATE_LIMITER_DURATION);
 
 export class Middlewares {
     public static validateAuthHeader(req: Request, res: Response, next: NextFunction): unknown {
@@ -95,6 +88,24 @@ export class Middlewares {
         return next();
     }
 
+    public static validateDateHeader(req: Request, res: Response, next: NextFunction): unknown {
+        const dateHeader = req.headers.date;
+        if (dateHeader === undefined) {
+            const error = ErrorGenerator.invalidDateHeader(req.originalUrl);
+            return res.status(error.status).send(error);
+        }
+
+        const requestTime = new Date(dateHeader);
+        const serverTime = new Date(Date.now());
+        const diff = Utils.dateDiffMs(requestTime, serverTime) / 1000.0;
+        if (diff > Constants.MAX_DATE_HEADER_DIFF) {
+            const error = ErrorGenerator.invalidDateHeader(req.originalUrl);
+            return res.status(error.status).send(error);
+        }
+
+        return next();
+    }
+
     public static rateLimiter(req: Request, res: Response, next: NextFunction): unknown {
         function setHeaderValues(ip: string) {
             res.setHeader('X-Rate-Limit-Limit', rateLimiter.maxLimit);
@@ -111,6 +122,7 @@ export class Middlewares {
         setHeaderValues(req.ip);
         if (!valid) {
             const error = ErrorGenerator.tooManyRequests(req.originalUrl);
+            res.setHeader('Retry-At', rateLimiter.getRemainingSecondsBeforeReset());
             return res.status(error.status).send(error);
         }
 

@@ -10,6 +10,8 @@ export interface Error {
 }
 
 export enum ErrorID {
+    INVALID_DATE_HEADER = 'invalid-date-header',
+
     UNAUTHORIZED = 'unauthorized',
     FORBIDDEN = 'forbidden',
     TOO_MANY_REQUESTS = 'too-many-requests',
@@ -42,6 +44,8 @@ export enum ErrorID {
 }
 
 export enum ErrorTitle {
+    INVALID_DATE_HEADER = 'Invalid Date header',
+
     UNAUTHORIZED = 'Unauthorized',
     FORBIDDEN = 'Forbidden',
     TOO_MANY_REQUESTS = 'Too many requests',
@@ -130,6 +134,17 @@ export enum StatusCode {
 }
 
 export class ErrorGenerator {
+    public static invalidDateHeader(instance: string): Error {
+        const error: Error = {
+            error: ErrorID.INVALID_DATE_HEADER,
+            title: ErrorTitle.INVALID_DATE_HEADER,
+            status: StatusCode.BAD_REQUEST,
+            detail: 'Invalid Date header',
+            instance: instance
+        };
+        return error;
+    }
+
     public static unauthorized(instance: string): Error {
         const error: Error = {
             error: ErrorID.UNAUTHORIZED,
