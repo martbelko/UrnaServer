@@ -61,21 +61,10 @@ CREATE TABLE "Admin" (
 );
 
 -- CreateTable
-CREATE TABLE "BanInfo" (
-    "id" SERIAL NOT NULL,
-    "name" VARCHAR(128) NOT NULL,
-    "steam2ID" VARCHAR(32) NOT NULL,
-    "steam3ID" VARCHAR(32) NOT NULL,
-    "steamID64" VARCHAR(32) NOT NULL,
-    "ip" VARCHAR(32) NOT NULL,
-
-    CONSTRAINT "BanInfo_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Ban" (
     "id" SERIAL NOT NULL,
     "targetUserID" INTEGER NOT NULL,
+    "targetUserIP" VARCHAR(16) NOT NULL,
     "adminID" INTEGER NOT NULL,
     "banInfoID" INTEGER NOT NULL,
     "unbanID" INTEGER,
@@ -153,9 +142,6 @@ ALTER TABLE "Admin" ADD CONSTRAINT "Admin_userID_fkey" FOREIGN KEY ("userID") RE
 
 -- AddForeignKey
 ALTER TABLE "Ban" ADD CONSTRAINT "Ban_targetUserID_fkey" FOREIGN KEY ("targetUserID") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Ban" ADD CONSTRAINT "Ban_banInfoID_fkey" FOREIGN KEY ("banInfoID") REFERENCES "BanInfo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Ban" ADD CONSTRAINT "Ban_adminID_fkey" FOREIGN KEY ("adminID") REFERENCES "Admin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

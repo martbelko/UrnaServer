@@ -74,20 +74,11 @@ model Admin {
   unbans Unban[]
 }
 
-model BanInfo {
-  id        Int    @id @default(autoincrement())
-  name      String @db.VarChar(128)
-  steam2ID  String @db.VarChar(32)
-  steam3ID  String @db.VarChar(32)
-  steamID64 String @db.VarChar(32)
-  ip        String @db.VarChar(32)
-
-  ban Ban?
-}
-
 model Ban {
   id           Int @id @default(autoincrement())
   targetUserID Int
+
+  targetUserIP String @db.VarChar(16)
 
   adminID   Int
   banInfoID Int @unique
@@ -103,7 +94,6 @@ model Ban {
   serverID Int?
 
   targetUser User    @relation(fields: [targetUserID], references: [id])
-  banInfo    BanInfo @relation(fields: [banInfoID], references: [id]) // Info about the target client
   admin      Admin   @relation(fields: [adminID], references: [id])
   unban      Unban?
   server     Server? @relation(fields: [serverID], references: [id])
