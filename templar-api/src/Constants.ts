@@ -17,4 +17,7 @@ export class Constants {
 
     static readonly ACCESS_TOKEN_EXPIRATION = 60 * 5; // Seconds
     static readonly REFRESH_TOKEN_EXPIRATION = 60 * 60 * 24 * 7; // 1 week
+
+    static readonly MAX_REQUESTS_PER_DURATION = 1;
+    static readonly RATE_LIMITER_DURATION = 60; // Seconds
 }

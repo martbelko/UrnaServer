@@ -12,8 +12,10 @@ export interface Error {
 export enum ErrorID {
     UNAUTHORIZED = 'unauthorized',
     FORBIDDEN = 'forbidden',
+    TOO_MANY_REQUESTS = 'too-many-requests',
 
     INVALID_REFRESH_TOKEN = 'invalid-refresh-token',
+    INVALID_IP = 'invalid-ip',
 
     STEAM_AUTH_FAIL = 'steam-authentication-fail',
 
@@ -42,8 +44,10 @@ export enum ErrorID {
 export enum ErrorTitle {
     UNAUTHORIZED = 'Unauthorized',
     FORBIDDEN = 'Forbidden',
+    TOO_MANY_REQUESTS = 'Too many requests',
 
     INVALID_REFRESH_TOKEN = 'Invalid refresh token',
+    INVALID_IP = 'Invalid IP',
 
     STEAM_AUTH_FAIL = 'Steam authentication failed',
 
@@ -148,12 +152,34 @@ export class ErrorGenerator {
         return error;
     }
 
+    public static tooManyRequests(instance: string): Error {
+        const error: Error = {
+            error: ErrorID.TOO_MANY_REQUESTS,
+            title: ErrorTitle.TOO_MANY_REQUESTS,
+            status: StatusCode.TOO_MANY_REQUESTS,
+            detail: 'Too many requests',
+            instance: instance
+        };
+        return error;
+    }
+
     public static invalidRefreshToken(instance: string): Error {
         const error: Error = {
             error: ErrorID.INVALID_REFRESH_TOKEN,
             title: ErrorTitle.INVALID_REFRESH_TOKEN,
             status: StatusCode.FORBIDDEN,
             detail: 'Refresh token is invalid',
+            instance: instance
+        };
+        return error;
+    }
+
+    public static invalidIP(instance: string): Error {
+        const error: Error = {
+            error: ErrorID.INVALID_IP,
+            title: ErrorTitle.INVALID_IP,
+            status: StatusCode.BAD_REQUEST,
+            detail: 'Could not resolve IP',
             instance: instance
         };
         return error;

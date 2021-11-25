@@ -12,6 +12,7 @@ import { AccessTokenPayload, RefreshTokenPayload, TokenManager } from './authori
 import { ErrorGenerator } from './Error';
 import { PrismaClient } from '.prisma/client';
 import { Constants } from './Constants';
+import { Middlewares } from './routers/Middlewares';
 
 dotenv.config();
 const app = express();
@@ -28,6 +29,7 @@ export class Server {
         app.use(express.json());
         app.use(cors());
         app.enable('trust proxy');
+        app.use(Middlewares.rateLimiter);
 
         /* PASSPORT JS */
         interface SteamProfile {
