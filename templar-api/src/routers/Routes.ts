@@ -22,3 +22,9 @@ export enum ServersRoutes {
     SERVERS_PUT = '/api/servers/:id',
     ON_CLIENT_CONNECT_POST = '/api/servers/on-client-connect'
 }
+
+export enum BansRoutes {
+    GET = '/api/bans',
+    POST = '/api/bans',
+    DELETE = '/api/bans:id'
+}

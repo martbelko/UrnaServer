@@ -6,7 +6,7 @@ import passport from 'passport';
 import passportSteam from 'passport-steam';
 
 import { UsersRouter } from './routers/Users/Users';
-import { AdminsRoutes, AuthRoutes, ServersRoutes, UsersRoutes } from './routers/Routes';
+import { AdminsRoutes, AuthRoutes, BansRoutes, ServersRoutes, UsersRoutes } from './routers/Routes';
 import { AdminsRouter } from './routers/Admins/Admins';
 import { TokenRouter } from './routers/Auth/Auth';
 import { AccessTokenPayload, RefreshTokenPayload, TokenManager } from './authorization/TokenManager';
@@ -14,6 +14,7 @@ import { ErrorGenerator } from './Error';
 import { Constants } from './Constants';
 import { Middlewares } from './routers/Middlewares';
 import { ServersRouter } from './routers/Servers/Servers';
+import { BansRouter } from './routers/Bans/Bans';
 
 dotenv.config();
 const app = express();
@@ -129,19 +130,24 @@ export class Server {
         const userGetRouter = new UsersRouter();
         const adminsRouter = new AdminsRouter();
         const serversRouter = new ServersRouter();
+        const bansRouter = new BansRouter();
         const tokenRouter = new TokenRouter();
 
-        app.get(UsersRoutes.GET, userGetRouter.getRouter());
-        app.patch(UsersRoutes.PATCH, userGetRouter.getRouter());
+        app.get(UsersRoutes.GET, Middlewares.validateDateHeader, userGetRouter.getRouter());
+        app.patch(UsersRoutes.PATCH, Middlewares.validateDateHeader, userGetRouter.getRouter());
 
-        app.get(AdminsRoutes.GET, adminsRouter.getRouter());
-        app.post(AdminsRoutes.POST, adminsRouter.getRouter());
-        app.put(AdminsRoutes.PUT, adminsRouter.getRouter());
-        app.delete(AdminsRoutes.DELETE, adminsRouter.getRouter());
+        app.get(AdminsRoutes.GET, Middlewares.validateDateHeader, adminsRouter.getRouter());
+        app.post(AdminsRoutes.POST, Middlewares.validateDateHeader, adminsRouter.getRouter());
+        app.put(AdminsRoutes.PUT, Middlewares.validateDateHeader, adminsRouter.getRouter());
+        app.delete(AdminsRoutes.DELETE, Middlewares.validateDateHeader, adminsRouter.getRouter());
 
-        app.get(ServersRoutes.SERVERS_GET, serversRouter.getRouter());
-        app.put(ServersRoutes.SERVERS_PUT, serversRouter.getRouter());
-        app.post(ServersRoutes.ON_CLIENT_CONNECT_POST, serversRouter.getRouter());
+        app.get(ServersRoutes.SERVERS_GET, Middlewares.validateDateHeader, serversRouter.getRouter());
+        app.put(ServersRoutes.SERVERS_PUT, Middlewares.validateDateHeader, serversRouter.getRouter());
+        app.post(ServersRoutes.ON_CLIENT_CONNECT_POST, Middlewares.validateDateHeader, serversRouter.getRouter());
+
+        app.get(BansRoutes.GET, Middlewares.validateDateHeader, bansRouter.getRouter());
+        app.post(BansRoutes.POST, Middlewares.validateDateHeader, bansRouter.getRouter());
+        app.delete(BansRoutes.DELETE, Middlewares.validateDateHeader, bansRouter.getRouter());
 
         app.post(AuthRoutes.TOKEN_POST, tokenRouter.getRouter());
 
