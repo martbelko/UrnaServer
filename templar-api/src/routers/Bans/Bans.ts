@@ -65,7 +65,7 @@ export class BansRouter {
             }
 
             try {
-                const bans = await prisma.ban.findMany({
+                const bans = await prisma.primaryBan.findMany({
                     select: {
                         id: true,
                         admin: {
@@ -116,7 +116,6 @@ export class BansRouter {
                             steamID: query.target.steamID
                         }
                     }
-
                 });
 
                 return res.status(StatusCode.OK).send(bans);

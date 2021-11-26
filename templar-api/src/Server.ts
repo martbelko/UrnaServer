@@ -149,7 +149,7 @@ export class Server {
         app.post(BansRoutes.POST, Middlewares.validateDateHeader, bansRouter.getRouter());
         app.delete(BansRoutes.DELETE, Middlewares.validateDateHeader, bansRouter.getRouter());
 
-        app.post(AuthRoutes.TOKEN_POST, tokenRouter.getRouter());
+        app.post(AuthRoutes.TOKEN_POST, Middlewares.validateDateHeader, tokenRouter.getRouter());
 
         app.listen(port, callback);
     }

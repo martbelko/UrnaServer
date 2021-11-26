@@ -11,10 +11,19 @@ generator client {
   previewFeatures = ["interactiveTransactions"]
 }
 
+model IP {
+  id Int    @id @default(autoincrement())
+  ip String @db.VarChar(16)
+
+  users User[]
+}
+
 model User {
   id      Int    @id @default(autoincrement())
   steamID String @unique
   emailID Int?   @unique
+
+  ips IP[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -22,9 +31,10 @@ model User {
   email         Email?         @relation(fields: [emailID], references: [id])
   refreshTokens RefreshToken[]
 
-  admin Admin?
-  vips  Vip[]
-  Ban   Ban[]
+  admin         Admin?
+  vips          Vip[]
+  primaryBans   PrimaryBan[]
+  secondaryBans SecondaryBan[]
 }
 
 model RefreshToken {
@@ -51,7 +61,7 @@ model Server {
   name       String     @unique
   serverType ServerType
 
-  bans Ban[]
+  primaryBans PrimaryBan[]
 }
 
 model Admin {
@@ -70,18 +80,14 @@ model Admin {
 
   user User @relation(fields: [userID], references: [id])
 
-  bans   Ban[]
-  unbans Unban[]
+  primaryBans PrimaryBan[]
+  unbans      Unban[]
 }
 
-model Ban {
+model PrimaryBan {
   id           Int @id @default(autoincrement())
   targetUserID Int
-
-  targetUserIP String @db.VarChar(16)
-
-  adminID   Int
-  banInfoID Int @unique
+  adminID      Int
 
   unbanID Int? @unique
 
@@ -93,10 +99,20 @@ model Ban {
 
   serverID Int?
 
-  targetUser User    @relation(fields: [targetUserID], references: [id])
-  admin      Admin   @relation(fields: [adminID], references: [id])
-  unban      Unban?
-  server     Server? @relation(fields: [serverID], references: [id])
+  targetUser    User           @relation(fields: [targetUserID], references: [id])
+  admin         Admin          @relation(fields: [adminID], references: [id])
+  unban         Unban?
+  server        Server?        @relation(fields: [serverID], references: [id])
+  secondaryBans SecondaryBan[]
+}
+
+model SecondaryBan {
+  id           Int @id @default(autoincrement())
+  primaryBanID Int
+  userID       Int
+
+  primaryBan PrimaryBan @relation(fields: [primaryBanID], references: [id])
+  user       User       @relation(fields: [userID], references: [id])
 }
 
 model Unban {
@@ -107,8 +123,8 @@ model Unban {
 
   createdAt DateTime @default(now())
 
-  admin Admin @relation(fields: [adminID], references: [id])
-  ban   Ban   @relation(fields: [banID], references: [id])
+  admin      Admin      @relation(fields: [adminID], references: [id])
+  primaryBan PrimaryBan @relation(fields: [banID], references: [id])
 }
 
 model Vip {
