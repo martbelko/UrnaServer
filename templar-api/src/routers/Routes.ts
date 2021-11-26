@@ -20,7 +20,8 @@ export enum AuthRoutes {
 export enum ServersRoutes {
     SERVERS_GET = '/api/servers',
     SERVERS_PUT = '/api/servers/:id',
-    ON_CLIENT_CONNECT_POST = '/api/servers/on-client-connect'
+    ON_CLIENT_CONNECT_POST = '/api/servers/on-client-connect',
+    ON_CLIENT_DISCONNECT_POST = '/api/servers/on-client-disconnect'
 }
 
 export enum BansRoutes {

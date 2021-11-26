@@ -12,25 +12,57 @@ export class BansRouter {
     public constructor() {
         this.mRouter.get(BansRoutes.GET, async (req, res) => {
             // TODO: Add pagination
+            interface Target {
+                id: string | undefined;
+                steamID: string | undefined
+            }
+
+            interface Admin {
+                id: string | undefined;
+                nickname: string | undefined;
+                steamID: string | undefined;
+            }
+
             const query = {
                 id: Number(req.query.id as string | undefined),
                 target: req.query.target === undefined ? {
                     id: NaN,
                     steamID: undefined
                 } : {
-                    id: Number((req.query.target as { id: string | undefined }).id),
-                    steamID: (req.query.target as { steamID: string | undefined }).steamID
+                    id: Number((req.query.target as unknown as Target).id),
+                    steamID: (req.query.target as unknown as Target).steamID
                 },
                 admin: req.query.admin === undefined ? {
                     id: NaN,
                     nickname: undefined,
                     steamID: undefined
                 } : {
-                    id: Number((req.query.admin as { id: string | undefined }).id),
-                    nickname: (req.query.admin as { nickname: string | undefined }).nickname,
-                    steamID: (req.query.admin as { steamID: string | undefined }).steamID
+                    id: Number((req.query.admin as unknown as Admin).id),
+                    nickname: (req.query.admin as unknown as Admin).nickname,
+                    steamID: (req.query.admin as unknown as Admin).steamID
                 }
             };
+
+            if (req.query.id !== undefined && !Utils.isFiniteNumber(query.id)) {
+                const error = ErrorGenerator.invalidQueryParameter('id', req.originalUrl);
+                return res.status(error.status).send(error);
+            }
+
+            if (req.query.target !== undefined) {
+                const target = req.query.target as unknown as Target;
+                if (target.id !== undefined && !Utils.isFiniteNumber(query.target.id)) {
+                    const error = ErrorGenerator.invalidQueryParameter('target[id]', req.originalUrl);
+                    return res.status(error.status).send(error);
+                }
+            }
+
+            if (req.query.admin !== undefined) {
+                const admin = req.query.admin as unknown as Admin;
+                if (admin.id !== undefined && !Utils.isFiniteNumber(query.admin.id)) {
+                    const error = ErrorGenerator.invalidQueryParameter('admin[id]', req.originalUrl);
+                    return res.status(error.status).send(error);
+                }
+            }
 
             try {
                 const bans = await prisma.ban.findMany({
@@ -71,16 +103,16 @@ export class BansRouter {
                         }
                     },
                     where: {
-                        id: Utils.isFiniteNumber(query.id) ? query.id : undefined,
+                        id: Utils.finiteNumberOrUndefined(query.id),
                         admin: {
-                            id: Utils.isFiniteNumber(query.admin.id) ? query.admin.id : undefined,
+                            id: Utils.finiteNumberOrUndefined(query.admin.id),
                             nickname: query.admin.nickname,
                             user: {
                                 steamID: query.admin.steamID
                             }
                         },
                         targetUser: {
-                            id: Utils.isFiniteNumber(query.target.id) ? query.id : undefined,
+                            id: Utils.finiteNumberOrUndefined(query.target.id),
                             steamID: query.target.steamID
                         }
                     }

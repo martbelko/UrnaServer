@@ -23,6 +23,10 @@ export class Utils {
         return !isNaN(number) && isFinite(number);
     }
 
+    public static finiteNumberOrUndefined(number: number): number | undefined {
+        return this.isFiniteNumber(number) ? number : undefined;
+    }
+
     public static validateEmail(email: string) : ValidationError | null {
         if (!Constants.EMAIL_REGEX.test(email)) {
             return ValidationError.REGEX_ERROR;
