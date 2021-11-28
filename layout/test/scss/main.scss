@@ -1,0 +1,171 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --clr-primary: #b00202;
+  --clr-dakr: #000;
+  --clr-light: #fff;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  height: calc(10%);
+}
+
+.fancy-tem {
+  font-family: 'Permanent Marker', cursive;
+}
+
+.fancy-play {
+  font-family: 'Orbitron', sans-serif;
+}
+
+.name {
+  font-size: 2.5rem;
+  width: 50vw;
+  align-self: center;
+  margin-right: auto;
+  margin: 0;
+}
+
+.hamburger {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 1em;
+}
+
+.main {
+  height: 78%;
+  background: linear-gradient(165.64deg, #c9c9c9 4.52%, #dcdcdc 96.04%);
+}
+
+.main-slogan {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 900;
+  padding: 0.5em;
+}
+
+.nav::after {
+  content: '';
+  display: block;
+  width: 90vw;
+  height: 3px;
+  margin: 1em;
+  background: var(--clr-primary);
+}
+
+.nav__list {
+  list-style: none;
+  display: flex;
+  padding: 0;
+  margin: 0;
+  margin-left: 1em;
+  gap: 1.5em;
+}
+
+.nav__link {
+  color: black;
+  text-decoration: inherit;
+  font-size: 1.5rem;
+}
+
+.btn {
+  cursor: pointer;
+  display: inline-block;
+  padding: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 10px;
+}
+
+.btn--primary {
+  background: var(--clr-primary);
+  color: var(--clr-light);
+}
+
+.btn--outline {
+  outline: 3px solid var(--clr-primary);
+  outline-offset: -3px;
+  color: var(--clr-primary);
+}
+
+.secondary-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  margin-right: 1em;
+  height: 15vh;
+}
+
+.templar-logo {
+  margin-left: 1em;
+}
+
+.secondary-slogan {
+  font-size: 1.9rem;
+}
+
+.description {
+  margin: 1em;
+  padding: 0;
+  font-size: 1.5rem;
+}
+
+.footer {
+  background: var(--clr-primary);
+  height: 12%;
+}
+
+.footer-nav {
+  height: 100%;
+}
+
+.footer-nav__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+}
+
+.footer-nav__link {
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+
+  display: grid;
+  grid-template-areas:
+    'icon'
+    'icon'
+    'title';
+}
+
+.footer-nav__item-icon {
+  grid-area: icon;
+  height: 100%;
+}
+
+.footer-nav__item-title {
+  grid-area: title;
+  text-align: center;
+  color: var(--clr-light);
+  margin-top: -0.75em;
+}
