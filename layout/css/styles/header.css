@@ -1,86 +1,38 @@
-.header {
+@import './../main.css';
+
+.main-header {
+  background: var(--primary-bg-color);
+  color: var(--primary-font-color);
   display: flex;
-  justify-content: flex-start;
+  flex-direction: row;
   align-items: center;
-  height: var(--header-height);
-  width: 100%;
-  margin-bottom: var(--header-bottom-margin);
-  border-bottom: var(--header-border-size) solid var(--header-border-color);
-  box-shadow: 0 0 10vh 3vh var(--header-shadow-color);
-  background: var(--header-bg-color);
+  height: 5em;
 }
 
-.header__logo {
+.logo-container {
+  background: white;
   width: 15%;
-  height: var(--header-height);
+  border-radius: 50%;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-left: 0.5em;
+  margin-right: 1em;
 }
 
-.logo__img {
-  height: calc(var(--header-height) - 2rem);
+.title {
+  font-family: var(--secondary-font-family);
+  font-weight: 10;
+  font-size: 1.9rem;
+  letter-spacing: 0.04em;
 }
 
-.logo__text {
-  display: block;
-  font-size: 1.1rem;
+.title__first {
+  color: var(--secondary-font-color);
 }
 
-.header__log {
-  width: 15%;
-  text-align: center;
+.hammenu-container {
+  width: 10%;
   margin-left: auto;
-}
-
-.header__log__item {
-  text-decoration: none;
-  color: var(--primary-font-color);
-}
-
-.header__log__item--login:hover {
-  color: red;
-}
-
-.header__nav {
-  width: 70%;
-}
-
-.nav__main-nav {
-  list-style-type: none;
-  background: var(--header-color);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 0;
-  margin: 0;
-  height: var(--header-height);
-}
-
-.main-nav__item {
-  width: 11vw;
-}
-
-.main-nav__item__link {
-  background: var(--header-bg-color);
-  display: block;
-  text-align: center;
-  height: 100%;
-  width: 100%;
-  text-decoration: none;
-  color: var(--primary-font-color);
-  border: 1px solid var(--primary-font-color);
-  box-sizing: border-box;
-  padding: 0.5rem;
-}
-
-.main-nav__item__link--selected {
-  background: var(--header-link-bg-active-color);
-}
-
-.main-nav__item__link:hover {
-  background: black;
-  color: white;
-  transition: 0.5s background, 0.5s color;
+  margin-right: 0.5em;
 }

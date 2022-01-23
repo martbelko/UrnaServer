@@ -1,0 +1,21 @@
+@import './../main.css';
+
+.welcome-section {
+  background-image: url('../../assets/background/galaxy.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  backdrop-filter: blur(2px);
+}
+
+.welcome-section__title {
+  filter: none;
+  color: var(--primary-font-color);
+  margin: 0;
+  padding: 0.5em;
+  font-size: 2.5rem;
+}
+
+.welcome-section__desc {
+  color: var(--secondary-font-color);
+}
