@@ -11,7 +11,7 @@
 
 .logo-container {
   background: white;
-  width: 15%;
+  width: min(15%, 4rem);
   border-radius: 50%;
   display: flex;
   justify-content: center;
