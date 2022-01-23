@@ -1,7 +1,6 @@
 @import './../main.css';
 
 .main-header {
-  background: var(--primary-bg-color);
   color: var(--primary-font-color);
   display: flex;
   flex-direction: row;
@@ -10,7 +9,7 @@
 }
 
 .logo-container {
-  background: white;
+  background: var(--secondary-font-color);
   width: min(15%, 4rem);
   border-radius: 50%;
   display: flex;

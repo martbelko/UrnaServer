@@ -15,6 +15,7 @@
   margin: 0 0 0.75rem 0;
   padding: 1rem;
   font-size: 2.5rem;
+  font-weight: 900;
 }
 
 .welcome-section__desc {
@@ -23,6 +24,7 @@
   margin: 0;
   padding: 1rem;
   padding-bottom: 0;
+  font-size: 1.125rem;
 }
 
 .button-link {
@@ -56,4 +58,46 @@
 
 .welcome-section__placeholder {
   height: 1px;
+}
+
+.how-section__title {
+  color: var(--secondary-font-color);
+  font-size: 2.25rem;
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.how-section__desc {
+  color: var(--secondary-font-color);
+  opacity: var(--light-font-opacity);
+  text-align: center;
+  font-size: 1.125rem;
+}
+
+.how-section__card {
+  margin-bottom: 4rem;
+}
+
+.how-section__card:last-of-type {
+  margin-bottom: 0;
+}
+
+.card__logo-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.card__title {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  color: var(--primary-font-color);
+  text-align: center;
+  font-size: 1.9rem;
+}
+
+.card__desc {
+  color: var(--secondary-font-color);
+  opacity: var(--light-font-opacity);
+  text-align: center;
+  font-size: 1.125rem;
 }
