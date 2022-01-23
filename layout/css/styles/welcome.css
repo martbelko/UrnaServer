@@ -1,21 +1,59 @@
 @import './../main.css';
 
-.welcome-section {
+.welcome-section-wrapper {
   background-image: url('../../assets/background/galaxy.jpg');
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 100% 100%;
+}
 
+.welcome-section {
   backdrop-filter: blur(2px);
 }
 
 .welcome-section__title {
-  filter: none;
   color: var(--primary-font-color);
-  margin: 0;
-  padding: 0.5em;
+  margin: 0 0 0.75rem 0;
+  padding: 1rem;
   font-size: 2.5rem;
 }
 
 .welcome-section__desc {
   color: var(--secondary-font-color);
+  opacity: var(--light-font-opacity);
+  margin: 0;
+  padding: 1rem;
+  padding-bottom: 0;
+}
+
+.button-link {
+  display: block;
+  color: #000000;
+  text-decoration: none;
+  padding: 0.7em;
+  display: flex;
+  justify-content: center;
+  border-radius: 1.2rem;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.primary-link {
+  color: var(--secondary-font-color);
+  background: var(--primary-font-color);
+  width: 80%;
+  margin: auto;
+  margin-top: 1.25em;
+  margin-bottom: 0.75em;
+}
+
+.ghost-link {
+  color: var(--primary-font-color);
+  outline: 2px solid var(--primary-font-color);
+  width: 80%;
+  margin: auto;
+  margin-bottom: 0.75em;
+}
+
+.welcome-section__placeholder {
+  height: 1px;
 }
