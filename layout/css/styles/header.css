@@ -30,8 +30,10 @@
   color: var(--secondary-font-color);
 }
 
-.hammenu-container {
+.hamburger-container {
   width: 10%;
   margin-left: auto;
   margin-right: 0.5em;
+  background: transparent;
+  border: none;
 }
