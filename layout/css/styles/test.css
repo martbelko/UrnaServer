@@ -1,0 +1,34 @@
+:root {
+  --from-color: #000;
+  --to-color: #b00202;
+}
+
+body {
+  background: black;
+}
+
+p {
+  --animation-time: 3s;
+
+  font-size: 80px;
+  color: #fff;
+  text-align: center;
+
+  -webkit-animation: glow var(--animation-time) ease-in-out infinite alternate;
+  -moz-animation: glow var(--animation-time) ease-in-out infinite alternate;
+  animation: glow var(--animation-time) ease-in-out infinite alternate;
+}
+
+@-webkit-keyframes glow {
+  from {
+    text-shadow: 0 0 20px #fff, 0 0 30px #fff, 0 0 40px var(--from-color),
+      0 0 50px var(--from-color), 0 0 60px var(--from-color),
+      0 0 70px var(--from-color), 0 0 80px var(--from-color);
+  }
+  to {
+    text-shadow: 0 0 20px #fff, 0 0 30px var(--to-color),
+      0 0 40px var(--to-color), 0 0 50px var(--to-color),
+      0 0 60px var(--to-color), 0 0 70px var(--to-color),
+      0 0 80px var(--to-color);
+  }
+}

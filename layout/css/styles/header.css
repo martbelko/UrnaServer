@@ -5,7 +5,9 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  height: 5em;
+  height: var(--header-height);
+
+  transition: all ease-in-out 700ms;
 }
 
 .logo-container {
@@ -17,23 +19,78 @@
   align-items: center;
   margin-left: 0.5em;
   margin-right: 1em;
+
+  transition: all ease-in-out 700ms;
 }
 
-.title {
+.header-title {
   font-family: var(--secondary-font-family);
-  font-weight: 10;
+  font-weight: 400;
   font-size: 1.9rem;
   letter-spacing: 0.04em;
+
+  transition: all ease-in-out 700ms;
 }
 
-.title__first {
+.header-title__first {
   color: var(--secondary-font-color);
 }
 
-.hamburger-container {
-  width: 10%;
-  margin-left: auto;
-  margin-right: 0.5em;
-  background: transparent;
-  border: none;
+.hamburger {
+  --scale: 0.5;
+  margin: 0 1rem 0 auto;
+  transform: scale(var(--scale));
+}
+
+.hamburger .line {
+  width: 50px;
+  height: 5px;
+  background: #ffffff;
+  display: block;
+  margin: 8px auto;
+  -webkit-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+
+.hamburger:hover {
+  cursor: pointer;
+}
+
+.hamburger.is-active {
+  -webkit-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+  -webkit-transition-delay: 0.6s;
+  -o-transition-delay: 0.6s;
+  transition-delay: 0.6s;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg) scale(var(--scale));
+}
+
+.hamburger.is-active .line:nth-child(2) {
+  width: 0px;
+}
+
+.hamburger.is-active .line:nth-child(1),
+.hamburger.is-active .line:nth-child(3) {
+  -webkit-transition-delay: 0.3s;
+  -o-transition-delay: 0.3s;
+  transition-delay: 0.3s;
+}
+
+.hamburger.is-active .line:nth-child(1) {
+  -webkit-transform: translateY(13px);
+  -ms-transform: translateY(13px);
+  -o-transform: translateY(13px);
+  transform: translateY(13px);
+}
+
+.hamburger.is-active .line:nth-child(3) {
+  -webkit-transform: translateY(-13px) rotate(90deg);
+  -ms-transform: translateY(-13px) rotate(90deg);
+  -o-transform: translateY(-13px) rotate(90deg);
+  transform: translateY(-13px) rotate(90deg);
 }

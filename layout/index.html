@@ -13,21 +13,114 @@
     <link rel="stylesheet" href="css/main.css" />
 
     <link rel="stylesheet" href="css/styles/header.css" />
+    <link rel="stylesheet" href="css/styles/navigation.css" />
     <link rel="stylesheet" href="css/styles/welcome.css" />
 
     <title>TemPLAY</title>
+
+    <script src="index.js"></script>
 </head>
 <body>
     <header class="main-header">
         <a class="logo-container" href="#">
-            <img class="wtf" src="assets/svgs/helmet.svg" alt="Helmet logo" />
+            <img src="assets/svgs/helmet.svg" alt="Helmet logo" />
         </a>
-        <h1 class="title"><span class="title__first">Tem</span>play</h1>
-        <button class="hamburger-container">
-            <img src="assets/svgs/hamburgerMenu.svg" alt="Hamburger menu" />
-        </button>
+        <h1 class="header-title"><span class="header-title__first">Tem</span>play</h1>
+        <div onclick="myFunction()" class="hamburger">
+            <span class="line"></span>
+            <span class="line"></span>
+            <span class="line"></span>
+        </div>
     </header>
-    <main>
+
+    <nav class="navigation">
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+        <div class="firefly"></div>
+
+        <ul class="primary-nav">
+            <li class="primary-nav__item">
+                <a class="primary-nav__item__link" href="#">
+                    <div>
+                        <img class="primary-nav__item__logo primary-nav__item__logo--selected" src="./assets/svgs/home.svg" alt="Home" />
+                    </div>
+                    <h2 class="primary-nav__item__title primary-nav__item__title--selected">Home</h2>
+                </a>
+            </li>
+            <li class="primary-nav__item">
+                <a class="primary-nav__item__link" href="#">
+                    <div>
+                        <img class="primary-nav__item__logo" src="./assets/svgs/servers.svg" alt="Servers" />
+                    </div>
+                    <h2 class="primary-nav__item__title">Servers</h2>
+                </a>
+            </li>
+            <li class="primary-nav__item">
+                <a class="primary-nav__item__link" href="#">
+                    <div>
+                        <img class="primary-nav__item__logo" src="./assets/svgs/ban.svg" alt="Banlist" />
+                    </div>
+                    <h2 class="primary-nav__item__title">Banlist</h2>
+                </a>
+            </li>
+            <li class="primary-nav__item">
+                <a class="primary-nav__item__link" href="#">
+                    <div>
+                        <img class="primary-nav__item__logo" src="./assets/svgs/shopping-cart.svg" alt="Shop" />
+                    </div>
+                    <h2 class="primary-nav__item__title">Shop</h2>
+                </a>
+            </li>
+            <li class="primary-nav__item">
+                <a class="primary-nav__item__link" href="#">
+                    <div>
+                        <img class="primary-nav__item__logo" src="./assets/svgs/join.svg" alt="Join us" />
+                    </div>
+                    <h2 class="primary-nav__item__title">Join Us</h2>
+                </a>
+            </li>
+        </ul>
+
+        <ul class="secondary-nav">
+            <li class="secondary-nav__item">
+                <a class="secondary-nav__item__link" href="#">
+                    <img class="secondary-nav__item__link__logo" src="./assets/svgs/discord.svg" alt="Discord" />
+                    <h3 class="secondary-nav__item__link__title">Discord</h3>
+                </a>
+            </li>
+            <li class="secondary-nav__item">
+                <a class="secondary-nav__item__link" href="#">
+                    <img class="secondary-nav__item__link__logo" src="./assets/svgs/discord.svg" alt="Discord" />
+                    <h3 class="secondary-nav__item__link__title">Discord</h3>
+                </a>
+            </li>
+            <li class="secondary-nav__item">
+                <a class="secondary-nav__item__link" href="#">
+                    <img class="secondary-nav__item__link__logo" src="./assets/svgs/discord.svg" alt="Discord" />
+                    <h3 class="secondary-nav__item__link__title">Discord</h3>
+                </a>
+            </li>
+        </ul>
+
+        <a class="steam-login" href="#">
+            <img src="./assets/background/steam.png" alt="Steam login" class="steam-login__logo" />
+            <h4 class="steam-login__title">Steam login</h4>
+        </a>
+    </nav>
+
+    <main class="main-content">
         <section class="welcome-section-wrapper">
             <div class="welcome-section">
                 <h2 class="welcome-section__title">Vitaj na nasom portali</h2>

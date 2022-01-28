@@ -1,5 +1,9 @@
 @import './../main.css';
 
+.hide * {
+  display: none;
+}
+
 .welcome-section-wrapper {
   background-image: url('../../assets/background/galaxy.jpg');
   background-repeat: no-repeat;
