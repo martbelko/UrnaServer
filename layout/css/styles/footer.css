@@ -1,0 +1,33 @@
+@import './../main.css';
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: grey;
+}
+
+.bottom-nav {
+  position: relative;
+  display: flex;
+}
+
+.bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  text-decoration: none;
+  color: var(--secondary-font-color);
+  width: 25%;
+  padding: 0.2rem;
+}
+
+.bottom-nav__item__logo {
+  height: 5vh;
+  filter: var(--secondary-font-color-filter);
+}
+
+.bottom-nav__item__title {
+  margin: 0;
+}
